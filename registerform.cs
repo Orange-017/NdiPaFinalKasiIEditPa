@@ -587,49 +587,49 @@ namespace RECOMANAGESYS
 /*
 --ROLES
 CREATE TABLE TBL_Roles (
-    RoleId INT PRIMARY KEY IDENTITY(1,1),
-    RoleName NVARCHAR(50) NOT NULL UNIQUE
+    RoleId INT PRIMARY KEY IDENTITY(1,1),
+    RoleName NVARCHAR(50) NOT NULL UNIQUE
 );
+
 
 --PERMISSIONS
 CREATE TABLE TBL_Permissions (
-    PermissionId INT PRIMARY KEY IDENTITY(1,1),
-    PermissionName NVARCHAR(100) NOT NULL UNIQUE
+    PermissionId INT PRIMARY KEY IDENTITY(1,1),
+    PermissionName NVARCHAR(100) NOT NULL UNIQUE
 );
 
 --ROLE - PERMISSIONS JUNCTION
 CREATE TABLE TBL_RolePermissions (
-    RoleId INT NOT NULL,
-    PermissionId INT NOT NULL,
-    PRIMARY KEY (RoleId, PermissionId),
-    FOREIGN KEY (RoleId) REFERENCES TBL_Roles(RoleId),
-    FOREIGN KEY (PermissionId) REFERENCES TBL_Permissions(PermissionId)
+    RoleId INT NOT NULL,
+    PermissionId INT NOT NULL,
+    PRIMARY KEY (RoleId, PermissionId),
+    FOREIGN KEY (RoleId) REFERENCES TBL_Roles(RoleId),
+    FOREIGN KEY (PermissionId) REFERENCES TBL_Permissions(PermissionId)
 );
+
 
 --USERS
 CREATE TABLE Users (
-    UserID INT PRIMARY KEY IDENTITY(1,1),
-    Username NVARCHAR(50) NOT NULL UNIQUE,
-    PasswordHash NVARCHAR(255) NOT NULL,
-    Firstname NVARCHAR(50) NOT NULL,
-    Lastname NVARCHAR(50) NOT NULL,
-    MiddleName NVARCHAR(50) NULL,
-    RoleId INT NOT NULL,
-    CompleteAddress NVARCHAR(255) NULL,
-    ContactNumber NVARCHAR(20) NULL,
-    EmailAddress NVARCHAR(100) NULL,
-    MemberSince DATE NULL,
-    ProfilePicture VARBINARY(MAX) NULL,
-    CreatedDate DATETIME DEFAULT GETDATE(),
-    IsActive BIT DEFAULT 1,
-    FailedLoginAttempts INT DEFAULT 0,  
-    IsLocked BIT DEFAULT 0,  
-    IsEmailVerified BIT DEFAULT 0 ,
-    LoginEmail  NVARCHAR(100) NULL,
-    LastLoginTime DATETIME NULL,
-    LastLogoutTime DATETIME NULL,
-    FOREIGN KEY (RoleId) REFERENCES TBL_Roles(RoleId)
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    PasswordHash NVARCHAR(255) NOT NULL,
+    Firstname NVARCHAR(50) NOT NULL,
+    Lastname NVARCHAR(50) NOT NULL,
+    MiddleName NVARCHAR(50) NULL,
+    RoleId INT NOT NULL,
+    CompleteAddress NVARCHAR(255) NULL,
+    ContactNumber NVARCHAR(20) NULL,
+    EmailAddress NVARCHAR(100) NULL,
+    MemberSince DATE NULL,
+    ProfilePicture VARBINARY(MAX) NULL,
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    IsActive BIT DEFAULT 1,
+    FailedLoginAttempts INT DEFAULT 0,
+    IsLocked BIT DEFAULT 0,
+    LoginEmail  NVARCHAR(100) NULL,
+    FOREIGN KEY (RoleId) REFERENCES TBL_Roles(RoleId)
 );
+
 
 --DEFAULT ROLES(including Developer)
 INSERT INTO TBL_Roles (RoleName) VALUES
@@ -638,8 +638,13 @@ INSERT INTO TBL_Roles (RoleName) VALUES
 ('Secretary'),
 ('Treasurer'),
 ('Auditor'),
-('PRO'),
-('Member'),
+('PRO & Custodian Committee'),
+('Peace & Order'),
+('Health & Sanitation 1'),
+('Health & Sanitation 2'),
+('Grievance Chairman'),
+('Grievance Committee'),
+('Kabataan Youth Concern'),
 ('Developer');
 
 --DEFAULT PERMISSIONS
@@ -657,54 +662,115 @@ INSERT INTO TBL_Permissions (PermissionName) VALUES
 --PERMISSIONS ASSIGNMENT
 -- President(all permissions)
 INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'President'), PermissionId 
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'President'), PermissionId
 FROM TBL_Permissions;
-
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Developer'), PermissionId
+FROM TBL_Permissions;
 --Vice President(all permissions)
 INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Vice President'), PermissionId 
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Vice President'), PermissionId
 FROM TBL_Permissions;
 
 --Secretary(all permissions)
 INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Secretary'), PermissionId 
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Secretary'), PermissionId
 FROM TBL_Permissions;
 
 --Treasurer(subset)
 INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Treasurer'), PermissionId 
-FROM TBL_Permissions 
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Treasurer'), PermissionId
+FROM TBL_Permissions
 WHERE PermissionName IN (
-    'CanAccessMonthlyDues',
-    'CanEditMonthlyDues',
-    'CanAccessScheduling',
-    'CanAccessAnnouncements'
+    'CanAccessMonthlyDues',
+    'CanEditMonthlyDues',
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
 );
 
 --Auditor(subset)
 INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Auditor'), PermissionId 
-FROM TBL_Permissions 
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Auditor'), PermissionId
+FROM TBL_Permissions
 WHERE PermissionName IN (
-    'CanAccessMonthlyDues',
-    'CanEditMonthlyDues',
-    'CanAccessAnnouncements'
+    'CanAccessMonthlyDues',
+    'CanEditMonthlyDues',
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
 );
 
 --PRO(subset)
-INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'PRO'), PermissionId 
-FROM TBL_Permissions 
-WHERE PermissionName IN (
-    'CanAccessVisitorLog',
-    'CanAccessScheduling',
-    'CanAccessAnnouncements',
-    'CanPostAnnouncements'
-);
 
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'PRO & Custodian Committee'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Peace & Order'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Health & Sanitation 1'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Health & Sanitation 2'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Grievance Chairman'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Grievance Committee'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
+INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Kabataan Youth Concern'), PermissionId
+FROM TBL_Permissions
+WHERE PermissionName IN (
+    'CanAccessVisitorLog',
+    'CanAccessScheduling',
+    'CanAccessAnnouncements',
+    'CanPostAnnouncements'
+);
 --Developer(ALL permissions)
 INSERT INTO TBL_RolePermissions (RoleId, PermissionId)
-SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Developer'), PermissionId 
+SELECT (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Developer'), PermissionId
 FROM TBL_Permissions;
 
 --DEV ACCOUNT(plain password for your C# bypass) tied to Developer role
@@ -712,18 +778,18 @@ INSERT INTO Users
 (Username, PasswordHash, Firstname, Lastname, RoleId, IsActive)
 VALUES
 ('dev account', 'developer', 'Dev', 'Account',
- (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Developer'), 1) ;
+ (SELECT RoleId FROM TBL_Roles WHERE RoleName = 'Developer'), 1) ;
 
 
 
 -- Create Announcements with expiration date
 CREATE TABLE Announcements (
-    Id INT PRIMARY KEY IDENTITY(1,1),
-    Title NVARCHAR(200) NOT NULL,
-    Message NVARCHAR(MAX) NOT NULL,
-    DatePosted DATETIME DEFAULT GETDATE(),
-    ExpirationDate DATETIME NULL,
-    IsImportant BIT DEFAULT 0
+    Id INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(200) NOT NULL,
+    Message NVARCHAR(MAX) NOT NULL,
+    DatePosted DATETIME DEFAULT GETDATE(),
+    ExpirationDate DATETIME NULL,
+    IsImportant BIT DEFAULT 0
 );
 GO
 
@@ -731,115 +797,115 @@ GO
 CREATE OR ALTER PROCEDURE DeleteExpiredAnnouncements
 AS
 BEGIN
-    DELETE FROM Announcements
-    WHERE ExpirationDate IS NOT NULL AND ExpirationDate < GETDATE();
+    DELETE FROM Announcements
+    WHERE ExpirationDate IS NOT NULL AND ExpirationDate < GETDATE();
 END;
 GO
 
 --VISITORS LOG
 CREATE TABLE TBL_VisitorsLog(
-    VisitorID INT PRIMARY KEY IDENTITY(1, 1),
-    VisitorName VARCHAR(100) NOT NULL,
-    ContactNumber VARCHAR(20),
-    Date DATETIME NOT NULL DEFAULT GETDATE(),
-    VisitPurpose VARCHAR(200),
-    TimeIn DATETIME NOT NULL,
-    TimeOut DATETIME NULL
+    VisitorID INT PRIMARY KEY IDENTITY(1, 1),
+    VisitorName VARCHAR(100) NOT NULL,
+    ContactNumber VARCHAR(20),
+    Date DATETIME NOT NULL DEFAULT GETDATE(),
+    VisitPurpose VARCHAR(200),
+    TimeIn DATETIME NOT NULL,
+    TimeOut DATETIME NULL
 );
 
 -- Docu repo SQL storage
 CREATE TABLE DesktopItems (
-    ItemId INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(100) NOT NULL,
-    IsFolder BIT NOT NULL,
-    ParentId INT NULL,
-    IconType NVARCHAR(50) NULL,
-    FilePath NVARCHAR(500) NULL,
-    CreatedAt DATETIME DEFAULT GETDATE(),   
-    ModifiedAt DATETIME DEFAULT GETDATE(),   
-    FOREIGN KEY (ParentId) REFERENCES DesktopItems(ItemId)
+    ItemId INT IDENTITY(1,1) PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL,
+    IsFolder BIT NOT NULL,
+    ParentId INT NULL,
+    IconType NVARCHAR(50) NULL,
+    FilePath NVARCHAR(500) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    ModifiedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (ParentId) REFERENCES DesktopItems(ItemId)
 );
 
 CREATE TABLE Events (
-    EventId INT IDENTITY(1,1) PRIMARY KEY,
-    EventName NVARCHAR(255) NOT NULL,
-    EventDate DATE NOT NULL,
-    Venue NVARCHAR(255) NOT NULL,
-    EventTime TIME NOT NULL,
-    StartDateTime DATETIME NULL,
-    EndDateTime DATETIME NULL,
-    ApprovedBy NVARCHAR(100) NULL
+    EventId INT IDENTITY(1,1) PRIMARY KEY,
+    EventName NVARCHAR(255) NOT NULL,
+    EventDate DATE NOT NULL,
+    Venue NVARCHAR(255) NOT NULL,
+    EventTime TIME NOT NULL,
+    StartDateTime DATETIME NULL,
+    EndDateTime DATETIME NULL,
+    ApprovedBy NVARCHAR(100) NULL
 );
 
 CREATE TABLE GarbageCollectionSchedules (
-    ScheduleID INT PRIMARY KEY IDENTITY(1,1),
-    TruckCompany NVARCHAR(100) NOT NULL,
-    CollectionDay NVARCHAR(50) NOT NULL,
-    CollectionTime TIME NOT NULL,
-    Status BIT NOT NULL DEFAULT 1, 
-    CreatedDate DATETIME DEFAULT GETDATE(),
-    LastModified DATETIME DEFAULT GETDATE()
+    ScheduleID INT PRIMARY KEY IDENTITY(1,1),
+    TruckCompany NVARCHAR(100) NOT NULL,
+    CollectionDay NVARCHAR(50) NOT NULL,
+    CollectionTime TIME NOT NULL,
+    Status BIT NOT NULL DEFAULT 1,
+    CreatedDate DATETIME DEFAULT GETDATE(),
+    LastModified DATETIME DEFAULT GETDATE()
 );
 
 CREATE TABLE Residents (
-    ResidentID INT IDENTITY(1,1) PRIMARY KEY,    
-    HomeownerID INT NOT NULL,                     
-    FirstName NVARCHAR(50) NOT NULL,
-    MiddleName NVARCHAR(50),
-    LastName NVARCHAR(50) NOT NULL,
-    HomeAddress NVARCHAR(255) NOT NULL,
-    ContactNumber NVARCHAR(15) NOT NULL,
-    EmailAddress NVARCHAR(100),
-    EmergencyContactPerson NVARCHAR(100),
-    EmergencyContactNumber NVARCHAR(15),
-    ResidencyType NVARCHAR(50) NOT NULL CHECK (ResidencyType IN ('Owner', 'Tenant', 'Caretaker')),
-    IsActive BIT DEFAULT 1,
-    InactiveDate DATE NULL,
-    DateRegistered DATETIME DEFAULT GETDATE(),
-    INDEX IX_Residents_HomeownerID (HomeownerID),
-    INDEX IX_Residents_ResidencyType (ResidencyType),
-    INDEX IX_Residents_IsActive (IsActive)
+    ResidentID INT IDENTITY(1,1) PRIMARY KEY,
+    HomeownerID INT NOT NULL,
+    FirstName NVARCHAR(50) NOT NULL,
+    MiddleName NVARCHAR(50),
+    LastName NVARCHAR(50) NOT NULL,
+    HomeAddress NVARCHAR(255) NOT NULL,
+    ContactNumber NVARCHAR(15) NOT NULL,
+    EmailAddress NVARCHAR(100),
+    EmergencyContactPerson NVARCHAR(100),
+    EmergencyContactNumber NVARCHAR(15),
+    ResidencyType NVARCHAR(50) NOT NULL CHECK (ResidencyType IN ('Owner', 'Tenant', 'Caretaker')),
+    IsActive BIT DEFAULT 1,
+    InactiveDate DATE NULL,
+    DateRegistered DATETIME DEFAULT GETDATE(),
+    INDEX IX_Residents_HomeownerID (HomeownerID),
+    INDEX IX_Residents_ResidencyType (ResidencyType),
+    INDEX IX_Residents_IsActive (IsActive)
 );
 
 CREATE TABLE TBL_Units (
-    UnitID INT IDENTITY(1,1) PRIMARY KEY,
-    UnitNumber NVARCHAR(20) NOT NULL,
-    Block NVARCHAR(10) NOT NULL,
-    UnitType NVARCHAR(50) NOT NULL CHECK (UnitType IN ('Town house', 'Single Attach', 'Single Detach', 'Apartment')),
-    TotalRooms INT NULL,
-    AvailableRooms INT NULL,
-    IsOccupied BIT NOT NULL DEFAULT 0,
-    DateCreated DATETIME DEFAULT GETDATE(),
-    CONSTRAINT UQ_UnitNumber_Block UNIQUE (UnitNumber, Block),
-    CONSTRAINT CK_Rooms CHECK (AvailableRooms IS NULL OR TotalRooms IS NULL OR AvailableRooms <= TotalRooms),
-    CONSTRAINT CK_Apartment_Rooms CHECK (
-        (UnitType = 'Apartment' AND TotalRooms IS NOT NULL AND AvailableRooms IS NOT NULL) OR
-        (UnitType != 'Apartment' AND TotalRooms IS NULL AND AvailableRooms IS NULL)
-    ),
-    INDEX IX_Units_Type (UnitType),
-    INDEX IX_Units_Occupied (IsOccupied)
+    UnitID INT IDENTITY(1,1) PRIMARY KEY,
+    UnitNumber NVARCHAR(20) NOT NULL,
+    Block NVARCHAR(10) NOT NULL,
+    UnitType NVARCHAR(50) NOT NULL CHECK (UnitType IN ('Town house', 'Single Attach', 'Single Detach', 'Apartment')),
+    TotalRooms INT NULL,
+    AvailableRooms INT NULL,
+    IsOccupied BIT NOT NULL DEFAULT 0,
+    DateCreated DATETIME DEFAULT GETDATE(),
+    CONSTRAINT UQ_UnitNumber_Block UNIQUE (UnitNumber, Block),
+    CONSTRAINT CK_Rooms CHECK (AvailableRooms IS NULL OR TotalRooms IS NULL OR AvailableRooms <= TotalRooms),
+    CONSTRAINT CK_Apartment_Rooms CHECK (
+        (UnitType = 'Apartment' AND TotalRooms IS NOT NULL AND AvailableRooms IS NOT NULL) OR
+        (UnitType != 'Apartment' AND TotalRooms IS NULL AND AvailableRooms IS NULL)
+    ),
+    INDEX IX_Units_Type (UnitType),
+    INDEX IX_Units_Occupied (IsOccupied)
 );
 
 --- new HomeownerUnits table
 
 CREATE TABLE HomeownerUnits (
-    HomeownerUnitID INT IDENTITY(1,1) PRIMARY KEY,
-    ResidentID INT NOT NULL,
-    UnitID INT NOT NULL,
-    DateOfOwnership DATETIME NULL,
-    DateOfOwnershipEnd DATETIME NULL,
-    ApprovedByUserID INT NULL,
-    IsCurrent BIT DEFAULT 1,
-    DateCreated DATETIME DEFAULT GETDATE(),
-    CONSTRAINT FK_HomeownerUnits_Resident FOREIGN KEY (ResidentID) REFERENCES Residents(ResidentID),
-    CONSTRAINT FK_HomeownerUnits_Unit FOREIGN KEY (UnitID) REFERENCES TBL_Units(UnitID),
-    CONSTRAINT FK_HomeownerUnits_User FOREIGN KEY (ApprovedByUserID) REFERENCES Users(UserID),
-    
-    -- Flawed constraint 'UQ_Active_Resident_Unit' was removed.
-    -- Laggy index 'IX_HomeownerUnits_Current' was removed.
+    HomeownerUnitID INT IDENTITY(1,1) PRIMARY KEY,
+    ResidentID INT NOT NULL,
+    UnitID INT NOT NULL,
+    DateOfOwnership DATETIME NULL,
+    DateOfOwnershipEnd DATETIME NULL,
+    ApprovedByUserID INT NULL,
+    IsCurrent BIT DEFAULT 1,
+    DateCreated DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_HomeownerUnits_Resident FOREIGN KEY (ResidentID) REFERENCES Residents(ResidentID),
+    CONSTRAINT FK_HomeownerUnits_Unit FOREIGN KEY (UnitID) REFERENCES TBL_Units(UnitID),
+    CONSTRAINT FK_HomeownerUnits_User FOREIGN KEY (ApprovedByUserID) REFERENCES Users(UserID),
+ 
+    -- Flawed constraint 'UQ_Active_Resident_Unit' was removed.
+    -- Laggy index 'IX_HomeownerUnits_Current' was removed.
 
-    INDEX IX_HomeownerUnits_Resident (ResidentID),
-    INDEX IX_HomeownerUnits_Unit (UnitID)
+    INDEX IX_HomeownerUnits_Resident (ResidentID),
+    INDEX IX_HomeownerUnits_Unit (UnitID)
 );
 GO
 CREATE UNIQUE INDEX UQ_Active_Resident_Unit
@@ -849,45 +915,44 @@ GO
 
 -- MonthlyDues table
 CREATE TABLE MonthlyDues(
-    DueId INT IDENTITY(1,1) PRIMARY KEY,
-    ResidentID INT NOT NULL,
-    UnitID INT NOT NULL,
-    PaymentDate DATE NOT NULL,
-    AmountPaid DECIMAL(10,2) NOT NULL,
-    DueRate DECIMAL(10,2) NOT NULL,
-    MonthCovered VARCHAR(20) NOT NULL,
-    Remarks NVARCHAR(255) NULL,
-    PaidByResidencyType NVARCHAR(50) NULL,
-    PaidByResidentName NVARCHAR(150) NULL,
-    DateRecorded DATETIME DEFAULT GETDATE(),
-    ProcessedByUserID INT NULL,
-    CONSTRAINT FK_MonthlyDues_Resident FOREIGN KEY (ResidentID) REFERENCES Residents(ResidentID),
-    CONSTRAINT FK_MonthlyDues_Unit FOREIGN KEY (UnitID) REFERENCES TBL_Units(UnitID),
-    CONSTRAINT FK_MonthlyDues_User FOREIGN KEY (ProcessedByUserID) REFERENCES Users(UserID),
+    DueId INT IDENTITY(1,1) PRIMARY KEY,
+    ResidentID INT NOT NULL,
+    UnitID INT NOT NULL,
+    PaymentDate DATE NOT NULL,
+    AmountPaid DECIMAL(10,2) NOT NULL,
+    DueRate DECIMAL(10,2) NOT NULL,
+    MonthCovered VARCHAR(20) NOT NULL,
+    Remarks NVARCHAR(255) NULL,
+    PaidByResidencyType NVARCHAR(50) NULL,
+    PaidByResidentName NVARCHAR(150) NULL,
+    DateRecorded DATETIME DEFAULT GETDATE(),
+    ProcessedByUserID INT NULL,
+    CONSTRAINT FK_MonthlyDues_Resident FOREIGN KEY (ResidentID) REFERENCES Residents(ResidentID),
+    CONSTRAINT FK_MonthlyDues_Unit FOREIGN KEY (UnitID) REFERENCES TBL_Units(UnitID),
+    CONSTRAINT FK_MonthlyDues_User FOREIGN KEY (ProcessedByUserID) REFERENCES Users(UserID),
 
-    INDEX IX_MonthlyDues_Resident (ResidentID),
-    INDEX IX_MonthlyDues_Unit (UnitID),
-    INDEX IX_MonthlyDues_Month (MonthCovered),
-    INDEX IX_MonthlyDues_Date (PaymentDate)
+    INDEX IX_MonthlyDues_Resident (ResidentID),
+    INDEX IX_MonthlyDues_Unit (UnitID),
+    INDEX IX_MonthlyDues_Month (MonthCovered),
+    INDEX IX_MonthlyDues_Date (PaymentDate)
 );
 
 CREATE TABLE PasswordResetTokens (
-    TokenId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    UserId INT NOT NULL,
-    Token NVARCHAR(100) NOT NULL,
-    Expiry DATETIME NOT NULL,
-    IsUsed BIT DEFAULT 0,
-    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+    TokenId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    UserId INT NOT NULL,
+    Token NVARCHAR(100) NOT NULL,
+    Expiry DATETIME NOT NULL,
+    IsUsed BIT DEFAULT 0,
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
 CREATE TABLE UserActivityLog (
-    LogID INT IDENTITY(1,1) PRIMARY KEY,
-    UserID INT NOT NULL,
-    Username NVARCHAR(100) NOT NULL,
-    RoleName NVARCHAR(50) NOT NULL,
-    ActivityType NVARCHAR(20) NOT NULL,
-    ActivityTime DATETIME NOT NULL DEFAULT GETDATE()
-); 
-
+    LogID INT IDENTITY(1,1) PRIMARY KEY,
+    UserID INT NOT NULL,
+    Username NVARCHAR(100) NOT NULL,
+    RoleName NVARCHAR(50) NOT NULL,
+    ActivityType NVARCHAR(20) NOT NULL,
+    ActivityTime DATETIME NOT NULL DEFAULT GETDATE()
+);
 -- UPDATED SQL --
 */
