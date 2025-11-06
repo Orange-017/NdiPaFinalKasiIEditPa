@@ -303,6 +303,19 @@ namespace RECOMANAGESYS
                                 MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            if ((eventType.Equals("Basketball", StringComparison.OrdinalIgnoreCase) ||
+                 eventType.Equals("Volleyball", StringComparison.OrdinalIgnoreCase)) &&
+                (venue.Equals("Club house 1", StringComparison.OrdinalIgnoreCase) ||
+                 venue.Equals("Club house 2", StringComparison.OrdinalIgnoreCase)))
+            {
+                MessageBox.Show(
+                    $"{eventType} events are only allowed in Basketball Court 1 or 2.",
+                    "Invalid Venue Selection",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
 
             try
             {
@@ -528,7 +541,7 @@ namespace RECOMANAGESYS
                     conn.Open();
                     string query = @"SELECT DISTINCT Lastname 
                              FROM Users 
-                             WHERE Lastname != 'account' 
+                             WHERE Lastname != 'dev' 
                              ORDER BY Lastname";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
@@ -940,6 +953,7 @@ namespace RECOMANAGESYS
 
         private void cmbEventType_SelectedIndexChanged(object sender, EventArgs e)
         {
+
             if (cmbEventType.Text.Equals("Other", StringComparison.OrdinalIgnoreCase))
             {
                 cmbEventType.DropDownStyle = ComboBoxStyle.DropDown;
@@ -948,6 +962,20 @@ namespace RECOMANAGESYS
             {
                 cmbEventType.DropDownStyle = ComboBoxStyle.DropDownList;
             }
+            string selectedEventType = cmbEventType.SelectedItem?.ToString();
+
+            Venuecmb.Items.Clear();
+
+            if (selectedEventType == "Basketball" || selectedEventType == "Volleyball")
+            {
+                Venuecmb.Items.AddRange(new string[] { "BasketBall court 1", "BasketBall court 2" });
+            }
+            else
+            {
+                Venuecmb.Items.AddRange(new string[] { "Club house 1", "Club house 2", "BasketBall court 1", "BasketBall court 2" });
+            }
+
+            Venuecmb.SelectedIndex = -1;
         }
 
         private void panel5_Paint(object sender, PaintEventArgs e)

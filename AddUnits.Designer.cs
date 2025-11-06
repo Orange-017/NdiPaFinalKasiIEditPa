@@ -210,7 +210,7 @@
             this.lblHomeownerInfo.AutoSize = true;
             this.lblHomeownerInfo.BackColor = System.Drawing.Color.Transparent;
             this.lblHomeownerInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.lblHomeownerInfo.Location = new System.Drawing.Point(592, 147);
+            this.lblHomeownerInfo.Location = new System.Drawing.Point(446, 125);
             this.lblHomeownerInfo.Name = "lblHomeownerInfo";
             this.lblHomeownerInfo.Size = new System.Drawing.Size(26, 18);
             this.lblHomeownerInfo.TabIndex = 16;

@@ -171,7 +171,7 @@
             this.cmbType.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.cmbType.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmbType.FormattingEnabled = true;
-            this.cmbType.Location = new System.Drawing.Point(579, 320);
+            this.cmbType.Location = new System.Drawing.Point(579, 314);
             this.cmbType.Name = "cmbType";
             this.cmbType.Size = new System.Drawing.Size(359, 33);
             this.cmbType.TabIndex = 29;
@@ -370,7 +370,7 @@
             this.lblValidation.AutoSize = true;
             this.lblValidation.BackColor = System.Drawing.Color.Transparent;
             this.lblValidation.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValidation.Location = new System.Drawing.Point(742, 289);
+            this.lblValidation.Location = new System.Drawing.Point(576, 502);
             this.lblValidation.Name = "lblValidation";
             this.lblValidation.Size = new System.Drawing.Size(26, 18);
             this.lblValidation.TabIndex = 51;

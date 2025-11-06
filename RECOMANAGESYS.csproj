@@ -61,7 +61,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>978BB1DB84E7D6BD4E65B0C1C86EDA335CAAA10A</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>CCBC5C592E58CD5BE16485A466D36B92C5AB879E</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestKeyFile>RECOMANAGESYS_TemporaryKey.pfx</ManifestKeyFile>
