@@ -933,5 +933,10 @@ namespace RECOMANAGESYS
             sep.AutoSize = true;
             flowBreadcrumb.Controls.Add(sep);
         }
+
+        private void docurepo_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

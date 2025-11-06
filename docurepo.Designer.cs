@@ -223,6 +223,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "docurepo";
             this.Size = new System.Drawing.Size(1110, 736);
+            this.Load += new System.EventHandler(this.docurepo_Load);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.ResumeLayout(false);
