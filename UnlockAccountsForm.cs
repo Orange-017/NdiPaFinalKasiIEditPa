@@ -58,14 +58,14 @@ namespace RECOMANAGESYS
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        while (reader.Read())
-                        {
+                        while(reader.Read())
+{
                             dgvLockedAccounts.Rows.Add(
                                 reader["UserID"],
                                 reader["Username"],
-                                reader["First Name"],
-                                reader["Last Name"],
-                                reader["Role Name"]
+                                reader["Firstname"],
+                                reader["Lastname"],
+                                reader["RoleName"]
                             );
                         }
                     }

@@ -169,17 +169,54 @@ namespace RECOMANAGESYS
                         attempts = reader["FailedLoginAttempts"] != DBNull.Value ? Convert.ToInt32(reader["FailedLoginAttempts"]) : 0;
                     }
                 }
-
-
-                if (dbUsername == "dev account" && password == "developer")
+                if (roleName.Equals("Developer", StringComparison.OrdinalIgnoreCase))
                 {
-                    CurrentUser.UserId = userId;
-                    CurrentUser.Username = dbUsername;
-                    CurrentUser.FullName = $"{firstName} {lastName}";
-                    CurrentUser.RoleId = roleId;
-                    CurrentUser.Role = roleName;
-                    CurrentUser.Permissions = LoadUserPermissions(roleId);
-                    return true;
+                    bool isDeveloperPasswordValid = false;
+
+                    if (password == storedHash)
+                    {
+                        isDeveloperPasswordValid = true;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            isDeveloperPasswordValid = BCrypt.Net.BCrypt.Verify(password, storedHash);
+                        }
+                        catch
+                        {
+                            isDeveloperPasswordValid = false;
+                        }
+                    }
+
+                    if (isDeveloperPasswordValid)
+                    {
+                        string resetQuery = @"UPDATE Users 
+                                     SET FailedLoginAttempts = 0, 
+                                         IsLocked = 0 
+                                     WHERE UserID = @userId";
+                        using (SqlCommand resetCmd = new SqlCommand(resetQuery, conn))
+                        {
+                            resetCmd.Parameters.AddWithValue("@userId", userId);
+                            resetCmd.ExecuteNonQuery();
+                        }
+
+                        CurrentUser.UserId = userId;
+                        CurrentUser.Username = dbUsername;
+                        CurrentUser.FullName = $"{firstName} {lastName}";
+                        CurrentUser.RoleId = roleId;
+                        CurrentUser.Role = roleName;
+                        CurrentUser.Permissions = LoadUserPermissions(roleId);
+
+                        return true;
+                    }
+                    else
+                    {
+                        // WRONG PASSWORD FOR DEVELOPER - DO NOT LOCK, 
+                        MessageBox.Show("Invalid password for Developer account.",
+                            "Authentication Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
                 }
 
                 if (!isActive)

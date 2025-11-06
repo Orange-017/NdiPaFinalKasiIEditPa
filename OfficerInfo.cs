@@ -350,8 +350,20 @@ namespace RECOMANAGESYS
 
                     foreach (DataRow row in changes.Rows)
                     {
-                        if (string.IsNullOrWhiteSpace(row["ContactNumber"].ToString()) ||
-                            row["ContactNumber"].ToString() == "Not Specified")
+                        string address = row["CompleteAddress"].ToString().Trim();
+                        string contactNumber = row["ContactNumber"].ToString().Trim();
+                        string email = row["EmailAddress"].ToString().Trim();
+
+                        if (string.IsNullOrWhiteSpace(address) || address == "Not Specified")
+                        {
+                            MessageBox.Show("Address cannot be empty.", "Validation Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            LoadOfficers();
+                            ToggleEditMode(false);
+                            return;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(contactNumber) || contactNumber == "Not Specified")
                         {
                             MessageBox.Show("Contact Number cannot be empty.", "Validation Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -360,8 +372,16 @@ namespace RECOMANAGESYS
                             return;
                         }
 
-                        if (string.IsNullOrWhiteSpace(row["EmailAddress"].ToString()) ||
-                            row["EmailAddress"].ToString() == "Not Specified")
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(contactNumber, @"^\d{11}$"))
+                        {
+                            MessageBox.Show("Contact Number must be exactly 11 digits.", "Validation Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            LoadOfficers();
+                            ToggleEditMode(false);
+                            return;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(email) || email == "Not Specified")
                         {
                             MessageBox.Show("Email Address cannot be empty.", "Validation Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -370,9 +390,8 @@ namespace RECOMANAGESYS
                             return;
                         }
 
-
-                        string email = row["EmailAddress"].ToString();
-                        if (!email.Contains("@") || !email.Contains("."))
+                        string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+                        if (!System.Text.RegularExpressions.Regex.IsMatch(email, emailPattern))
                         {
                             MessageBox.Show("Please enter a valid email address.", "Validation Error",
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -382,16 +401,16 @@ namespace RECOMANAGESYS
                         }
 
                         string updateQuery = @"UPDATE Users SET 
-                                                    CompleteAddress = @CompleteAddress, 
-                                                    ContactNumber = @ContactNumber,
-                                                    EmailAddress = @EmailAddress
-                                                WHERE UserID = @OfficerID";
+                                            CompleteAddress = @CompleteAddress, 
+                                            ContactNumber = @ContactNumber,
+                                            EmailAddress = @EmailAddress
+                                        WHERE UserID = @OfficerID";
 
                         using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
                         {
-                            cmd.Parameters.AddWithValue("@CompleteAddress", row["CompleteAddress"]);
-                            cmd.Parameters.AddWithValue("@ContactNumber", row["ContactNumber"]);
-                            cmd.Parameters.AddWithValue("@EmailAddress", row["EmailAddress"]);
+                            cmd.Parameters.AddWithValue("@CompleteAddress", address);
+                            cmd.Parameters.AddWithValue("@ContactNumber", contactNumber);
+                            cmd.Parameters.AddWithValue("@EmailAddress", email);
                             cmd.Parameters.AddWithValue("@OfficerID", row["OfficerID"]);
 
                             int rowsAffected = cmd.ExecuteNonQuery();
@@ -403,7 +422,7 @@ namespace RECOMANAGESYS
                     }
                 }
 
-                MessageBox.Show($"{updatedCount} officer record(s) updated successfully!", "Success",
+                MessageBox.Show($"updated successfully!", "Success",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -483,8 +502,122 @@ namespace RECOMANAGESYS
             }
             else
             {
-                SaveChanges();
+                if (ValidateCurrentRow())
+                {
+                    SaveChanges();
+                }
             }
+        }
+        private bool ValidateCurrentRow()
+        {
+            if (DGVOfficers.SelectedRows.Count == 0)
+                return false;
+
+            DataGridViewRow selectedRow = DGVOfficers.SelectedRows[0];
+
+         
+            string address = selectedRow.Cells["CompleteAddress"].Value?.ToString().Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(address) || address == "Not Specified")
+            {
+                MessageBox.Show(" Address cannot be empty.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["CompleteAddress"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            if (address.Length > 200)
+            {
+                MessageBox.Show("Complete Address is too long .",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["CompleteAddress"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            string contactNumber = selectedRow.Cells["ContactNumber"].Value?.ToString().Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(contactNumber) || contactNumber == "Not Specified")
+            {
+                MessageBox.Show("Contact Number cannot be empty.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["ContactNumber"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(contactNumber, @"^\d+$"))
+            {
+                MessageBox.Show("Contact Number must contain only digits",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["ContactNumber"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            if (contactNumber.Length != 11)
+            {
+                MessageBox.Show($"Contact Number must be exactly 11 digits.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["ContactNumber"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            if (!contactNumber.StartsWith("09"))
+            {
+                MessageBox.Show("Contact Number must start with '09'",
+                    "Validation Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["ContactNumber"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            string email = selectedRow.Cells["EmailAddress"].Value?.ToString().Trim() ?? "";
+
+          
+            if (string.IsNullOrWhiteSpace(email) || email == "Not Specified")
+            {
+                MessageBox.Show("Email Address cannot be empty.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["EmailAddress"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            string emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+            if (!System.Text.RegularExpressions.Regex.IsMatch(email, emailPattern))
+            {
+                MessageBox.Show("Please enter a valid email address.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["EmailAddress"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            if (email.Length > 100)
+            {
+                MessageBox.Show("Email Address is too long.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["EmailAddress"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+            if (email.Contains("..") || email.StartsWith(".") || email.EndsWith("."))
+            {
+                MessageBox.Show("Email Address contains invalid format.",
+                    "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DGVOfficers.CurrentCell = selectedRow.Cells["EmailAddress"];
+                DGVOfficers.BeginEdit(true);
+                return false;
+            }
+
+         
+            return true;
         }
 
         private void officerPanel_Paint(object sender, PaintEventArgs e)
@@ -524,7 +657,6 @@ namespace RECOMANAGESYS
                 return;
             }
 
-            // Prevent unregistering inactive officers
             if (status == "Inactive")
             {
                 MessageBox.Show("This officer is already unregistered.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -630,7 +762,6 @@ namespace RECOMANAGESYS
                 return;
             }
 
-            // Skip validation if Member or Developer (both can have multiple)
             bool skipValidation = position.Equals("Member", StringComparison.OrdinalIgnoreCase) ||
                                   position.Equals("Developer", StringComparison.OrdinalIgnoreCase);
 
