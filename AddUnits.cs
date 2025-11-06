@@ -308,6 +308,7 @@ namespace RECOMANAGESYS
 
                                     if (existingUnit != null && existingUnit != DBNull.Value)
                                     {
+
                                         unitId = Convert.ToInt32(existingUnit);
 
                                         string checkIfOwnedQuery = @"
@@ -555,7 +556,39 @@ namespace RECOMANAGESYS
                                     occupyCmd.ExecuteNonQuery();
                                 }
                             }
+                            if (_residencyType == "Owner" && unitTypeText == "Apartment")
+                            {
+                                int totalRooms = (cmbNumRooms.Enabled && int.TryParse(cmbNumRooms.Text, out int tr)) ? tr : 0;
 
+                                string fixRoomCountsQuery = @"
+                                    UPDATE TBL_Units
+                                    SET 
+                                        TotalRooms = @totalRooms,
+                                        AvailableRooms = 
+                                            CASE 
+                                                WHEN @totalRooms < AvailableRooms THEN @totalRooms
+                                                WHEN AvailableRooms IS NULL THEN @totalRooms
+                                                ELSE AvailableRooms
+                                            END
+                                    WHERE UnitID = @unitId";
+
+                                using (SqlCommand fixRoomsCmd = new SqlCommand(fixRoomCountsQuery, conn, transaction))
+                                {
+                                    fixRoomsCmd.Parameters.AddWithValue("@unitId", unitId);
+                                    fixRoomsCmd.Parameters.AddWithValue("@totalRooms", totalRooms);
+                                    fixRoomsCmd.ExecuteNonQuery();
+                                }
+                            }
+                            string syncAvailQuery = @"
+                                UPDATE TBL_Units
+                                SET AvailableRooms = TotalRooms
+                                WHERE UnitID = @unitId";
+
+                            using (SqlCommand syncCmd = new SqlCommand(syncAvailQuery, conn, transaction))
+                            {
+                                syncCmd.Parameters.AddWithValue("@unitId", unitId);
+                                syncCmd.ExecuteNonQuery();
+                            }
                             transaction.Commit();
                             MessageBox.Show("Unit registration successful", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             this.DialogResult = DialogResult.OK;
