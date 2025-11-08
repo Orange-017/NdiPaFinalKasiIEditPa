@@ -28,7 +28,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <InstallUrl>\\LAPTOP-FT905FTC\Users\daniela\OneDrive\RecordManageSystem\</InstallUrl>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -441,7 +441,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="RECOMANAGESYS_TemporaryKey.pfx" />
     <None Include="Resources\4e6ed6cc-4ae1-4591-8649-0704acde5ed2.jpg" />
   </ItemGroup>
   <ItemGroup>

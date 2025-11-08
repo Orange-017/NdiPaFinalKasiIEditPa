@@ -1459,6 +1459,19 @@
                     <PaddingBottom>2pt</PaddingBottom>
                   </Style>
                 </Textbox>
+                <Rectangle Name="Rectangle2">
+                  <KeepTogether>true</KeepTogether>
+                  <Top>1.04168in</Top>
+                  <Height>0.09028in</Height>
+                  <Width>9.18278in</Width>
+                  <ZIndex>5</ZIndex>
+                  <Style>
+                    <Border>
+                      <Style>None</Style>
+                    </Border>
+                    <BackgroundColor>RoyalBlue</BackgroundColor>
+                  </Style>
+                </Rectangle>
                 <Textbox Name="Textbox22">
                   <CanGrow>true</CanGrow>
                   <KeepTogether>true</KeepTogether>
@@ -1483,7 +1496,7 @@
                   <Left>4.64002in</Left>
                   <Height>0.41666in</Height>
                   <Width>3.35417in</Width>
-                  <ZIndex>5</ZIndex>
+                  <ZIndex>6</ZIndex>
                   <Style>
                     <Border>
                       <Style>None</Style>
@@ -1494,19 +1507,6 @@
                     <PaddingBottom>2pt</PaddingBottom>
                   </Style>
                 </Textbox>
-                <Rectangle Name="Rectangle2">
-                  <KeepTogether>true</KeepTogether>
-                  <Top>1.04168in</Top>
-                  <Height>0.09028in</Height>
-                  <Width>9.18278in</Width>
-                  <ZIndex>6</ZIndex>
-                  <Style>
-                    <Border>
-                      <Style>None</Style>
-                    </Border>
-                    <BackgroundColor>RoyalBlue</BackgroundColor>
-                  </Style>
-                </Rectangle>
               </ReportItems>
               <KeepTogether>true</KeepTogether>
               <Height>1.13196in</Height>

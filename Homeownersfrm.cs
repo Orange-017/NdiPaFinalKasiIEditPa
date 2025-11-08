@@ -547,7 +547,7 @@ namespace RECOMANAGESYS
 
                     string query = @"
                         SELECT 
-                            tu.UnitNumber AS [Lot],
+                            tu.UnitNumber,
                             tu.Block,
                             tu.UnitType,
                             MAX(CASE WHEN r.ResidencyType = 'Owner' THEN CONCAT(r.FirstName, ' ', r.LastName) END) AS [Owner Name],

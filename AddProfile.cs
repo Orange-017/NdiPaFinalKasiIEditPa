@@ -2,6 +2,8 @@
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Drawing;             // for Image, Bitmap, and Color
+using System.Drawing.Imaging; // optional for advanced image ops
 
 namespace RECOMANAGESYS
 {
@@ -10,6 +12,8 @@ namespace RECOMANAGESYS
         private const int ContactNumberLength = 11;
         private int? editResidentId = null;
         private bool isEditMode = false;
+        private byte[] uploadedFileBytes = null;
+        private string uploadedFileName = "";
 
         public ResidencyRegisterfrm()
         {
@@ -19,9 +23,11 @@ namespace RECOMANAGESYS
             cmbUnitNum.DropDown += cmbUnitNum_DropDown;
             cmbUnitNum.SelectedIndexChanged += cmbUnitNum_SelectedIndexChanged;
 
+            lblFileName.DoubleClick += lblFileName_Click;
             this.AutoScaleMode = AutoScaleMode.Dpi;
             LoadResidencyTypes();
             SetupFormForAddMode();
+
         }
 
         public ResidencyRegisterfrm(int editResidentId)
@@ -293,7 +299,12 @@ namespace RECOMANAGESYS
         {
             if (!ValidateRegistrationInputs(out int homeownerId))
                 return;
-
+            if (uploadedFileBytes == null)
+            {
+                MessageBox.Show("Please upload a proof of residency document before saving.",
+                                "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             try
             {
                 string residencyType = cmbType.Text.Trim();
@@ -371,7 +382,8 @@ namespace RECOMANAGESYS
                                     ContactNumber = @ContactNumber,
                                     EmailAddress = @Email,
                                     EmergencyContactPerson = @EmergencyContactPerson,
-                                    EmergencyContactNumber = @EmergencyContactNumber
+                                    EmergencyContactNumber = @EmergencyContactNumber,
+                                    ProofOfResidency = @ProofOfResidency
                                 WHERE ResidentID = @ResidentID", conn);
 
                         cmd.Parameters.AddWithValue("@ResidentID", editResidentId.Value);
@@ -382,11 +394,11 @@ namespace RECOMANAGESYS
                                 INSERT INTO Residents
                                     (HomeownerID, FirstName, MiddleName, LastName, HomeAddress,
                                      ContactNumber, EmailAddress, EmergencyContactPerson,
-                                     EmergencyContactNumber, ResidencyType)
+                                     EmergencyContactNumber, ResidencyType, ProofOfResidency)
                                 VALUES
                                     (@HomeownerID, @FirstName, @MiddleName, @LastName, @Address,
                                      @ContactNumber, @Email, @EmergencyContactPerson,
-                                     @EmergencyContactNumber, @ResidencyType)", conn);
+                                     @EmergencyContactNumber, @ResidencyType, @ProofOfResidency)", conn);
 
                         cmd.Parameters.AddWithValue("@HomeownerID", homeownerId);
                         cmd.Parameters.AddWithValue("@ResidencyType", residencyType);
@@ -400,6 +412,11 @@ namespace RECOMANAGESYS
                     cmd.Parameters.AddWithValue("@Email", string.IsNullOrWhiteSpace(Emailtxt.Text) ? (object)DBNull.Value : Emailtxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@EmergencyContactPerson", string.IsNullOrWhiteSpace(emergencyPersontxt.Text) ? (object)DBNull.Value : emergencyPersontxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@EmergencyContactNumber", string.IsNullOrWhiteSpace(emergencyNumtxt.Text) ? (object)DBNull.Value : emergencyNumtxt.Text.Trim());
+
+                    if (uploadedFileBytes != null)
+                        cmd.Parameters.AddWithValue("@ProofOfResidency", uploadedFileBytes);
+                    else
+                        cmd.Parameters.AddWithValue("@ProofOfResidency", DBNull.Value);
 
                     cmd.ExecuteNonQuery();
 
@@ -676,5 +693,93 @@ namespace RECOMANAGESYS
         private void label4_Click(object sender, EventArgs e) { }
         private void cmbBlock_SelectedIndexChanged(object sender, EventArgs e) { }
         private void lblValidation_Click(object sender, EventArgs e) { }
+
+        private void btnUploadProof_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = "Select Proof of Residency Document";
+                openFileDialog.Filter = "Image or PDF Files|*.jpg;*.jpeg;*.png;*.pdf";
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    uploadedFileName = openFileDialog.FileName;
+                    uploadedFileBytes = System.IO.File.ReadAllBytes(uploadedFileName);
+                    lblFileName.Text = System.IO.Path.GetFileName(uploadedFileName);
+                }
+            }
+        }
+
+        private void lblFileName_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(uploadedFileName) || !System.IO.File.Exists(uploadedFileName))
+                {
+                    MessageBox.Show("No file found.",
+                                    "File Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string fileExtension = System.IO.Path.GetExtension(uploadedFileName).ToLower();
+
+                // smaall pop up window
+                Form previewForm = new Form();
+                previewForm.Text = "Proof of Residency Preview";
+                previewForm.StartPosition = FormStartPosition.CenterParent;
+                previewForm.Size = new System.Drawing.Size(600, 700);
+                previewForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+                previewForm.MaximizeBox = false;
+                previewForm.MinimizeBox = false;
+
+                if (fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".png")
+                {
+                    // for images
+                    PictureBox pictureBox = new PictureBox();
+                    pictureBox.Dock = DockStyle.Fill;
+                    pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                    pictureBox.Image = Image.FromFile(uploadedFileName);
+                    previewForm.Controls.Add(pictureBox);
+                }
+                else if (fileExtension == ".pdf")
+                {
+                    // For PDF, gagamitin natin default viewer (since Windows Forms can't render PDF directly)
+                    Label lblInfo = new Label();
+                    lblInfo.Text = "PDF preview not supported inside the app.\nClick 'Open in Default Viewer' below to view.";
+                    lblInfo.Dock = DockStyle.Top;
+                    lblInfo.TextAlign = ContentAlignment.MiddleCenter;
+                    lblInfo.Height = 60;
+
+                    Button btnOpenPdf = new Button();
+                    btnOpenPdf.Text = "Open in Default Viewer";
+                    btnOpenPdf.Dock = DockStyle.Bottom;
+                    btnOpenPdf.Height = 40;
+                    btnOpenPdf.Click += (s, args) =>
+                    {
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                        {
+                            FileName = uploadedFileName,
+                            UseShellExecute = true
+                        });
+                    };
+
+                    previewForm.Controls.Add(lblInfo);
+                    previewForm.Controls.Add(btnOpenPdf);
+                }
+                else
+                {
+                    MessageBox.Show("Preview not supported for this file type.",
+                                    "Unsupported File", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                previewForm.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to preview the file.\n\n" + ex.Message,
+                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
