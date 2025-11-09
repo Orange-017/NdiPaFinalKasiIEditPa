@@ -307,7 +307,7 @@
             this.cmbUnitNum.FormattingEnabled = true;
             this.cmbUnitNum.Location = new System.Drawing.Point(252, 483);
             this.cmbUnitNum.Name = "cmbUnitNum";
-            this.cmbUnitNum.Size = new System.Drawing.Size(110, 33);
+            this.cmbUnitNum.Size = new System.Drawing.Size(163, 33);
             this.cmbUnitNum.TabIndex = 47;
             this.cmbUnitNum.SelectedIndexChanged += new System.EventHandler(this.cmbUnitNum_SelectedIndexChanged);
             // 
@@ -327,7 +327,7 @@
             this.label4.AutoSize = true;
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(368, 488);
+            this.label4.Location = new System.Drawing.Point(136, 530);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(57, 24);
             this.label4.TabIndex = 50;
@@ -339,9 +339,9 @@
             this.cmbBlock.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.cmbBlock.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmbBlock.FormattingEnabled = true;
-            this.cmbBlock.Location = new System.Drawing.Point(431, 483);
+            this.cmbBlock.Location = new System.Drawing.Point(199, 525);
             this.cmbBlock.Name = "cmbBlock";
-            this.cmbBlock.Size = new System.Drawing.Size(75, 33);
+            this.cmbBlock.Size = new System.Drawing.Size(216, 33);
             this.cmbBlock.TabIndex = 49;
             this.cmbBlock.SelectedIndexChanged += new System.EventHandler(this.cmbBlock_SelectedIndexChanged);
             // 
@@ -350,7 +350,7 @@
             this.lblValidation.AutoSize = true;
             this.lblValidation.BackColor = System.Drawing.Color.Transparent;
             this.lblValidation.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblValidation.Location = new System.Drawing.Point(135, 512);
+            this.lblValidation.Location = new System.Drawing.Point(135, 568);
             this.lblValidation.Name = "lblValidation";
             this.lblValidation.Size = new System.Drawing.Size(26, 18);
             this.lblValidation.TabIndex = 51;
@@ -360,7 +360,7 @@
             // btnUploadProof
             // 
             this.btnUploadProof.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnUploadProof.Location = new System.Drawing.Point(180, 598);
+            this.btnUploadProof.Location = new System.Drawing.Point(642, 450);
             this.btnUploadProof.Name = "btnUploadProof";
             this.btnUploadProof.Size = new System.Drawing.Size(226, 25);
             this.btnUploadProof.TabIndex = 52;
@@ -372,7 +372,7 @@
             // 
             this.lblFileName.BackColor = System.Drawing.Color.Transparent;
             this.lblFileName.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFileName.Location = new System.Drawing.Point(161, 626);
+            this.lblFileName.Location = new System.Drawing.Point(623, 478);
             this.lblFileName.Name = "lblFileName";
             this.lblFileName.Size = new System.Drawing.Size(276, 25);
             this.lblFileName.TabIndex = 53;
@@ -383,7 +383,7 @@
             // lblAdd
             // 
             this.lblAdd.AutoSize = true;
-            this.lblAdd.Location = new System.Drawing.Point(135, 542);
+            this.lblAdd.Location = new System.Drawing.Point(135, 598);
             this.lblAdd.Name = "lblAdd";
             this.lblAdd.Size = new System.Drawing.Size(58, 16);
             this.lblAdd.TabIndex = 54;
