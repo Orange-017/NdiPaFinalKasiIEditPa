@@ -13,6 +13,8 @@ namespace RECOMANAGESYS
         public AddUnits(int residentId, int homeownerId, string residencyType)
         {
             InitializeComponent();
+            cmbBlock.SelectedIndexChanged += cmbBlock_SelectedIndexChanged;
+            cmbLot.SelectedIndexChanged += cmbLot_SelectedIndexChanged;
             this.AutoScaleMode = AutoScaleMode.Dpi;
             _residentId = residentId;
             _homeownerId = homeownerId;
@@ -34,6 +36,7 @@ namespace RECOMANAGESYS
         {
             try
             {
+                LoadFixedBlocks();
                 if (cmbUnitType != null)
                 {
                     cmbUnitType.Items.Clear();
@@ -195,13 +198,6 @@ namespace RECOMANAGESYS
         private bool ValidateInput()
         {
 
-            if (string.IsNullOrWhiteSpace(unitNumbertxt.Text))
-            {
-                MessageBox.Show("Please enter a unit number.", "Validation Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                unitNumbertxt.Focus();
-                return false;
-            }
 
             if (cmbUnitType == null || cmbUnitType.SelectedIndex == -1)
             {
@@ -287,8 +283,9 @@ namespace RECOMANAGESYS
                             }
 
                             int unitId = -1;
-                            string unitNumber = unitNumbertxt.Text.Trim();
-                            object blockVal = string.IsNullOrWhiteSpace(blocktxt?.Text) ? (object)DBNull.Value : blocktxt.Text.Trim();
+                            string unitNumber = cmbLot.SelectedItem?.ToString() ?? "";
+                            object blockVal = cmbBlock.SelectedItem != null ? cmbBlock.SelectedItem.ToString() : (object)DBNull.Value;
+
                             string unitTypeText = cmbUnitType?.Text ?? "";
 
                             int numRooms = 0;
@@ -372,9 +369,9 @@ namespace RECOMANAGESYS
                                     else
                                     {
                                         string insertUnitQuery = @"
-                                        INSERT INTO TBL_Units (UnitNumber, Block, UnitType, IsOccupied, TotalRooms, AvailableRooms)
-                                        VALUES (@unitNumber, @block, @unitType, @isOccupied, @totalRooms, @availableRooms);
-                                        SELECT SCOPE_IDENTITY();";
+                                            INSERT INTO TBL_Units (UnitNumber, Block, UnitType, IsOccupied, TotalRooms, AvailableRooms)
+                                            VALUES (@unitNumber, @block, @unitType, @isOccupied, @totalRooms, @availableRooms);
+                                            SELECT SCOPE_IDENTITY();";
 
                                         using (SqlCommand insertUnitCmd = new SqlCommand(insertUnitQuery, conn, transaction))
                                         {
@@ -426,9 +423,9 @@ namespace RECOMANAGESYS
                                 if (unitTypeText == "Apartment" && _residencyType == "Tenant")
                                 {
                                     string checkAvailabilityQuery = @"
-                                    SELECT AvailableRooms, TotalRooms
-                                    FROM TBL_Units
-                                    WHERE UnitID = @unitId";
+                                        SELECT AvailableRooms, TotalRooms
+                                        FROM TBL_Units
+                                        WHERE UnitID = @unitId";
 
                                     using (SqlCommand checkCmd = new SqlCommand(checkAvailabilityQuery, conn, transaction))
                                     {
@@ -536,9 +533,9 @@ namespace RECOMANAGESYS
                             if (_residencyType != "Owner" && unitTypeText == "Apartment")
                             {
                                 string updateRoomsQuery = @"
-                                UPDATE TBL_Units
-                                SET AvailableRooms = AvailableRooms - 1
-                                WHERE UnitID = @unitId";
+                                    UPDATE TBL_Units
+                                    SET AvailableRooms = AvailableRooms - 1
+                                    WHERE UnitID = @unitId";
 
                                 using (SqlCommand updateRoomsCmd = new SqlCommand(updateRoomsQuery, conn, transaction))
                                 {
@@ -589,6 +586,32 @@ namespace RECOMANAGESYS
                                 syncCmd.Parameters.AddWithValue("@unitId", unitId);
                                 syncCmd.ExecuteNonQuery();
                             }
+
+                            string checkExistingUnitsQuery = @"
+                                SELECT COUNT(*) 
+                                FROM HomeownerUnits 
+                                WHERE ResidentID = @residentId AND IsCurrent = 1";
+
+                            using (SqlCommand checkUnitsCmd = new SqlCommand(checkExistingUnitsQuery, conn, transaction))
+                            {
+                                checkUnitsCmd.Parameters.AddWithValue("@residentId", _residentId);
+                                int existingUnitsCount = Convert.ToInt32(checkUnitsCmd.ExecuteScalar());
+
+                                if (existingUnitsCount == 1 && _residencyType == "Owner")
+                                {
+                                    string fullAddress = $"Block {cmbBlock.SelectedItem}, Lot {cmbLot.SelectedItem}, Mabuhay Homes 2000 Ph2F Golden City Brgy, Dila Santarosa City";
+
+                                    string updateAddressQuery = @"UPDATE Residents SET HomeAddress = @address WHERE ResidentID = @residentId";
+                                    using (SqlCommand updateAddressCmd = new SqlCommand(updateAddressQuery, conn, transaction))
+                                    {
+                                        updateAddressCmd.Parameters.AddWithValue("@address", fullAddress);
+                                        updateAddressCmd.Parameters.AddWithValue("@residentId", _residentId);
+                                        updateAddressCmd.ExecuteNonQuery();
+                                    }
+                                }
+                             
+                            }
+
                             transaction.Commit();
                             MessageBox.Show("Unit registration successful", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             this.DialogResult = DialogResult.OK;
@@ -657,10 +680,64 @@ namespace RECOMANAGESYS
                 cmbNumRooms.SelectedIndex = -1;
             }
         }
+        private void LoadFixedBlocks()
+        {
+            cmbBlock.Items.Clear();
+            cmbBlock.Items.AddRange(new string[] { "1", "2", "3", "4", "5" });
+        }
+        private void LoadLotsForBlock(string block)
+        {
+            cmbLot.Items.Clear();
+            int lotCount = 0;
 
+            switch (block)
+            {
+                case "1": lotCount = 20; break;
+                case "2": lotCount = 31; break;
+                case "3": lotCount = 26; break;
+                case "4": lotCount = 22; break;
+                case "5": lotCount = 21; break;
+            }
+
+            for (int i = 1; i <= lotCount; i++)
+                cmbLot.Items.Add(i.ToString());
+
+            if (cmbLot.Items.Count > 0)
+                cmbLot.SelectedIndex = 0;
+        }
+        private void UpdateSelectedUnit()
+        {
+            if (cmbBlock.SelectedItem != null && cmbLot.SelectedItem != null)
+            {
+                string block = cmbBlock.SelectedItem.ToString();
+                string lot = cmbLot.SelectedItem.ToString();
+
+
+            }
+        }
         private void HomeownerID_TextChanged(object sender, EventArgs e) { }
         private void DTPOwnership_ValueChanged(object sender, EventArgs e) { }
         private void label2_Click(object sender, EventArgs e) { }
         private void Approvedbytxt_TextChanged(object sender, EventArgs e) { }
+
+        private void cmbLot_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateSelectedUnit();
+        }
+
+        private void cmbBlock_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbBlock.SelectedItem != null)
+            {
+                LoadLotsForBlock(cmbBlock.SelectedItem.ToString());
+                UpdateSelectedUnit();
+            }
+        }
+
+        private void cmbApprovedBy_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
+
 }

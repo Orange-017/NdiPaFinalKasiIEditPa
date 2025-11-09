@@ -2,8 +2,8 @@
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Drawing;             // for Image, Bitmap, and Color
-using System.Drawing.Imaging; // optional for advanced image ops
+using System.Drawing;             
+using System.Drawing.Imaging; 
 
 namespace RECOMANAGESYS
 {
@@ -13,16 +13,17 @@ namespace RECOMANAGESYS
         private int? editResidentId = null;
         private bool isEditMode = false;
         private byte[] uploadedFileBytes = null;
+        private bool ownerUnitRegistered = false;
+        private int registeredOwnerResidentId = 0;
+
         private string uploadedFileName = "";
 
         public ResidencyRegisterfrm()
         {
             InitializeComponent();
-
             cmbType.SelectedIndexChanged += cmbPosition_SelectedIndexChanged;
             cmbUnitNum.DropDown += cmbUnitNum_DropDown;
             cmbUnitNum.SelectedIndexChanged += cmbUnitNum_SelectedIndexChanged;
-
             lblFileName.DoubleClick += lblFileName_Click;
             this.AutoScaleMode = AutoScaleMode.Dpi;
             LoadResidencyTypes();
@@ -37,7 +38,6 @@ namespace RECOMANAGESYS
             LoadResidencyTypes();
             this.editResidentId = editResidentId;
             isEditMode = true;
-
             this.Text = "Edit Resident";
             SetupFormForEditMode();
             LoadResidentData();
@@ -49,6 +49,7 @@ namespace RECOMANAGESYS
             residentlbl.Visible = true;
             ResidentIDtxt.ReadOnly = false;
             UpdateResidentIDLabel();
+
         }
 
         private void SetupFormForEditMode()
@@ -57,6 +58,12 @@ namespace RECOMANAGESYS
             residentlbl.Visible = true;
             ResidentIDtxt.ReadOnly = true;
             cmbType.Enabled = false;
+
+            cmbBlock.Visible = false;
+            cmbUnitNum.Visible = false;
+
+
+
         }
 
         private void LoadResidencyTypes()
@@ -85,6 +92,7 @@ namespace RECOMANAGESYS
                 ResidentIDtxt.Text = "Enter existing Owner's ID";
             }
         }
+        
 
         private void LoadResidentData()
         {
@@ -95,6 +103,7 @@ namespace RECOMANAGESYS
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
+
                     string query = "SELECT * FROM Residents WHERE ResidentID = @id";
                     SqlCommand cmd = new SqlCommand(query, conn);
                     cmd.Parameters.AddWithValue("@id", editResidentId.Value);
@@ -106,13 +115,19 @@ namespace RECOMANAGESYS
                         FirstNametxt.Text = reader["FirstName"].ToString();
                         MiddleNametxt.Text = reader["MiddleName"] == DBNull.Value ? "" : reader["MiddleName"].ToString();
                         lastNametxt.Text = reader["LastName"].ToString();
-                        addresstxt.Text = reader["HomeAddress"].ToString();
                         contactnumtxt.Text = reader["ContactNumber"].ToString();
                         Emailtxt.Text = reader["EmailAddress"] == DBNull.Value ? "" : reader["EmailAddress"].ToString();
                         emergencyPersontxt.Text = reader["EmergencyContactPerson"] == DBNull.Value ? "" : reader["EmergencyContactPerson"].ToString();
                         emergencyNumtxt.Text = reader["EmergencyContactNumber"] == DBNull.Value ? "" : reader["EmergencyContactNumber"].ToString();
                         cmbType.Text = reader["ResidencyType"].ToString();
+
+                        string currentAddress = reader["HomeAddress"]?.ToString() ?? "";
+                        if (!string.IsNullOrEmpty(currentAddress))
+                        {
+                            lblAdd.Text = currentAddress;
+                        }
                     }
+                    reader.Close();
                 }
             }
             catch (Exception ex)
@@ -121,7 +136,6 @@ namespace RECOMANAGESYS
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
         private bool ValidateRegistrationInputs(out int homeownerId)
         {
             homeownerId = 0;
@@ -142,10 +156,8 @@ namespace RECOMANAGESYS
                 return false;
             }
 
-           
             string first = FirstNametxt.Text?.Trim() ?? "";
             string last = lastNametxt.Text?.Trim() ?? "";
-            string address = addresstxt.Text?.Trim() ?? "";
             string contact = contactnumtxt.Text?.Trim() ?? "";
             string email = Emailtxt.Text?.Trim() ?? "";
             string emergencyPerson = emergencyPersontxt.Text?.Trim() ?? "";
@@ -153,7 +165,6 @@ namespace RECOMANAGESYS
 
             if (first.Equals("Enter first name", StringComparison.OrdinalIgnoreCase)) first = "";
             if (last.Equals("Enter last name", StringComparison.OrdinalIgnoreCase)) last = "";
-            if (address.Equals("Enter address", StringComparison.OrdinalIgnoreCase)) address = "";
             if (contact.Equals("Enter contact number", StringComparison.OrdinalIgnoreCase)) contact = "";
             if (email.Equals("Enter email", StringComparison.OrdinalIgnoreCase)) email = "";
             if (emergencyPerson.Equals("Enter emergency contact", StringComparison.OrdinalIgnoreCase)) emergencyPerson = "";
@@ -161,14 +172,13 @@ namespace RECOMANAGESYS
 
             if (string.IsNullOrWhiteSpace(first) ||
                 string.IsNullOrWhiteSpace(last) ||
-                string.IsNullOrWhiteSpace(address) ||
                 string.IsNullOrWhiteSpace(contact) ||
                 string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(emergencyPerson) ||
                 string.IsNullOrWhiteSpace(emergencyNum))
             {
                 MessageBox.Show("Please fill in all required fields:\n\n" +
-                    "- First Name\n- Last Name\n- Address\n- Contact Number\n- Email\n- Emergency Contact Person\n- Emergency Contact Number",
+                    "- First Name\n- Last Name\n- Contact Number\n- Email\n- Emergency Contact Person\n- Emergency Contact Number",
                     "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -194,7 +204,6 @@ namespace RECOMANAGESYS
                 return false;
             }
 
-       
             if (cmbUnitNum.SelectedItem == null)
             {
                 if (residencyType.Equals("Tenant", StringComparison.OrdinalIgnoreCase) ||
@@ -206,7 +215,6 @@ namespace RECOMANAGESYS
                 }
             }
 
-         
             if (residencyType.Equals("Owner", StringComparison.OrdinalIgnoreCase))
             {
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
@@ -214,12 +222,12 @@ namespace RECOMANAGESYS
                     conn.Open();
 
                     string checkQuery = @"
-                SELECT COUNT(*) 
-                FROM Residents
-                WHERE HomeownerID = @homeownerId
-                  AND ResidencyType = 'Owner'
-                  AND IsActive = 1
-                  AND ResidentID <> @editResidentId;";
+                        SELECT COUNT(*) 
+                        FROM Residents
+                        WHERE HomeownerID = @homeownerId
+                          AND ResidencyType = 'Owner'
+                          AND IsActive = 1
+                          AND ResidentID <> @editResidentId;";
 
                     using (SqlCommand cmd = new SqlCommand(checkQuery, conn))
                     {
@@ -267,6 +275,7 @@ namespace RECOMANAGESYS
                             MessageBoxIcon.Warning);
                         return false;
                     }
+
                     string getOwnerQuery = "SELECT FirstName, LastName FROM Residents WHERE HomeownerID = @id AND ResidencyType = 'Owner'";
                     SqlCommand ownerCmd = new SqlCommand(getOwnerQuery, conn);
                     ownerCmd.Parameters.AddWithValue("@id", homeownerId);
@@ -294,24 +303,52 @@ namespace RECOMANAGESYS
             return true;
         }
 
-
         private void Addbtn_Click(object sender, EventArgs e)
         {
+
             if (!ValidateRegistrationInputs(out int homeownerId))
                 return;
-            if (uploadedFileBytes == null)
+
+            if (!isEditMode && uploadedFileBytes == null)
             {
                 MessageBox.Show("Please upload a proof of residency document before saving.",
                                 "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
             try
             {
                 string residencyType = cmbType.Text.Trim();
+                string addressValue = "";
+
+                if (isEditMode)
+                {
+                    using (SqlConnection conn = DatabaseHelper.GetConnection())
+                    {
+                        conn.Open();
+                        string getAddressQuery = "SELECT HomeAddress FROM Residents WHERE ResidentID = @id";
+                        SqlCommand getAddressCmd = new SqlCommand(getAddressQuery, conn);
+                        getAddressCmd.Parameters.AddWithValue("@id", editResidentId.Value);
+                        object currentAddress = getAddressCmd.ExecuteScalar();
+                        addressValue = currentAddress?.ToString() ?? "";
+                    }
+                }
+                else
+                {
+                    if (residencyType == "Owner")
+                    {
+                        addressValue = lblAdd.Text.Trim();
+                    }
+                    else
+                    {
+                        addressValue = lblAdd.Text.Trim();
+                    }
+                }
 
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
+
                     if (!isEditMode && (residencyType == "Tenant" || residencyType == "Caretaker"))
                     {
                         if (!(cmbUnitNum.SelectedItem is ComboBoxItem selectedUnit))
@@ -355,68 +392,89 @@ namespace RECOMANAGESYS
                                                     "Apartment Fully Occupied",
                                                     MessageBoxButtons.OK,
                                                     MessageBoxIcon.Warning
-
                                                 );
                                                 return;
                                             }
-
-
                                         }
                                     }
                                 }
                             }
                         }
-
                     }
 
                     SqlCommand cmd;
 
                     if (isEditMode)
                     {
-                        cmd = new SqlCommand(@"
-                                UPDATE Residents
-                                SET FirstName = @FirstName,
-                                    MiddleName = @MiddleName,
-                                    LastName = @LastName,
-                                    HomeAddress = @Address,
-                                    ContactNumber = @ContactNumber,
-                                    EmailAddress = @Email,
-                                    EmergencyContactPerson = @EmergencyContactPerson,
-                                    EmergencyContactNumber = @EmergencyContactNumber,
-                                    ProofOfResidency = @ProofOfResidency
-                                WHERE ResidentID = @ResidentID", conn);
+                      
+                        if (uploadedFileBytes != null)
+                        {
+                            cmd = new SqlCommand(@"
+                        UPDATE Residents
+                        SET FirstName = @FirstName,
+                            MiddleName = @MiddleName,
+                            LastName = @LastName,
+                            ContactNumber = @ContactNumber,
+                            EmailAddress = @Email,
+                            EmergencyContactPerson = @EmergencyContactPerson,
+                            EmergencyContactNumber = @EmergencyContactNumber,
+                            ProofOfResidency = @ProofOfResidency
+                        WHERE ResidentID = @ResidentID", conn);
+                        }
+                        else
+                        {
+                          
+                            cmd = new SqlCommand(@"
+                        UPDATE Residents
+                        SET FirstName = @FirstName,
+                            MiddleName = @MiddleName,
+                            LastName = @LastName,
+                            ContactNumber = @ContactNumber,
+                            EmailAddress = @Email,
+                            EmergencyContactPerson = @EmergencyContactPerson,
+                            EmergencyContactNumber = @EmergencyContactNumber
+                        WHERE ResidentID = @ResidentID", conn);
+                        }
 
                         cmd.Parameters.AddWithValue("@ResidentID", editResidentId.Value);
                     }
                     else
                     {
                         cmd = new SqlCommand(@"
-                                INSERT INTO Residents
-                                    (HomeownerID, FirstName, MiddleName, LastName, HomeAddress,
-                                     ContactNumber, EmailAddress, EmergencyContactPerson,
-                                     EmergencyContactNumber, ResidencyType, ProofOfResidency)
-                                VALUES
-                                    (@HomeownerID, @FirstName, @MiddleName, @LastName, @Address,
-                                     @ContactNumber, @Email, @EmergencyContactPerson,
-                                     @EmergencyContactNumber, @ResidencyType, @ProofOfResidency)", conn);
+                    INSERT INTO Residents
+                        (HomeownerID, FirstName, MiddleName, LastName, HomeAddress,
+                         ContactNumber, EmailAddress, EmergencyContactPerson,
+                         EmergencyContactNumber, ResidencyType, ProofOfResidency)
+                    VALUES
+                        (@HomeownerID, @FirstName, @MiddleName, @LastName, @Address,
+                         @ContactNumber, @Email, @EmergencyContactPerson,
+                         @EmergencyContactNumber, @ResidencyType, @ProofOfResidency)", conn);
 
                         cmd.Parameters.AddWithValue("@HomeownerID", homeownerId);
                         cmd.Parameters.AddWithValue("@ResidencyType", residencyType);
+                        cmd.Parameters.AddWithValue("@Address", addressValue);
                     }
 
                     cmd.Parameters.AddWithValue("@FirstName", FirstNametxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@MiddleName", string.IsNullOrWhiteSpace(MiddleNametxt.Text) ? (object)DBNull.Value : MiddleNametxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@LastName", lastNametxt.Text.Trim());
-                    cmd.Parameters.AddWithValue("@Address", addresstxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@ContactNumber", contactnumtxt.Text.Trim());
+
                     cmd.Parameters.AddWithValue("@Email", string.IsNullOrWhiteSpace(Emailtxt.Text) ? (object)DBNull.Value : Emailtxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@EmergencyContactPerson", string.IsNullOrWhiteSpace(emergencyPersontxt.Text) ? (object)DBNull.Value : emergencyPersontxt.Text.Trim());
                     cmd.Parameters.AddWithValue("@EmergencyContactNumber", string.IsNullOrWhiteSpace(emergencyNumtxt.Text) ? (object)DBNull.Value : emergencyNumtxt.Text.Trim());
 
+               
                     if (uploadedFileBytes != null)
+                    {
                         cmd.Parameters.AddWithValue("@ProofOfResidency", uploadedFileBytes);
-                    else
+                    }
+                    else if (!isEditMode)
+                    {
+
                         cmd.Parameters.AddWithValue("@ProofOfResidency", DBNull.Value);
+                    }
+              
 
                     cmd.ExecuteNonQuery();
 
@@ -434,6 +492,51 @@ namespace RECOMANAGESYS
                         newResidentId = editResidentId.Value;
                     }
 
+           
+                    if (!isEditMode && residencyType.Equals("Owner", StringComparison.OrdinalIgnoreCase))
+                    {
+                        registeredOwnerResidentId = newResidentId;
+
+                        MessageBox.Show(
+                            "Resident information saved successfully!\n\n" +
+                            "Next step: Register the unit for this owner.",
+                            "Resident Saved",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+
+                        // Open AddUnits form
+                        AddUnits addUnitsForm = new AddUnits(newResidentId, homeownerId, residencyType);
+                        DialogResult result = addUnitsForm.ShowDialog();
+
+                        if (result == DialogResult.OK)
+                        {
+                            ownerUnitRegistered = true;
+                            MessageBox.Show(
+                                "Owner and unit registered successfully!",
+                                "Success",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+
+                            this.DialogResult = DialogResult.OK;
+                            this.Close();
+                        }
+                        else
+                        {
+                            MessageBox.Show(
+                                "Unit registration was cancelled.\n\n" +
+                                "The resident has been saved but no unit has been assigned.\n" +
+                                "You can assign a unit later from the main form.",
+                                "Unit Registration Cancelled",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+
+                            this.DialogResult = DialogResult.OK;
+                            this.Close();
+                        }
+                        return;
+                    }
+
+        
                     if (!isEditMode && (residencyType == "Tenant" || residencyType == "Caretaker"))
                     {
                         if (!(cmbUnitNum.SelectedItem is ComboBoxItem selectedUnit))
@@ -445,8 +548,9 @@ namespace RECOMANAGESYS
 
                         int selectedUnitId = selectedUnit.Value;
                         string linkQuery = @"
-                                    INSERT INTO HomeownerUnits (ResidentID, UnitID, IsCurrent, DateOfOwnership) 
-                                    VALUES (@newResidentId, @unitId, 1, GETDATE());";
+                            INSERT INTO HomeownerUnits (ResidentID, UnitID, IsCurrent, DateOfOwnership) 
+                            VALUES (@newResidentId, @unitId, 1, GETDATE());";
+
                         using (SqlCommand linkCmd = new SqlCommand(linkQuery, conn))
                         {
                             linkCmd.Parameters.AddWithValue("@newResidentId", newResidentId);
@@ -457,12 +561,13 @@ namespace RECOMANAGESYS
                         if (residencyType.Equals("Tenant", StringComparison.OrdinalIgnoreCase))
                         {
                             string updateRoomsQuery = @"
-                                        UPDATE TBL_Units
-                                        SET AvailableRooms = CASE 
-                                            WHEN AvailableRooms > 0 THEN AvailableRooms - 1 
-                                            ELSE 0 
-                                        END
-                                        WHERE UnitID = @unitId AND UnitType = 'Apartment';";
+                                UPDATE TBL_Units
+                                SET AvailableRooms = CASE 
+                                    WHEN AvailableRooms > 0 THEN AvailableRooms - 1 
+                                    ELSE 0 
+                                END
+                                WHERE UnitID = @unitId AND UnitType = 'Apartment';";
+
                             using (SqlCommand updateCmd = new SqlCommand(updateRoomsQuery, conn))
                             {
                                 updateCmd.Parameters.AddWithValue("@unitId", selectedUnitId);
@@ -471,13 +576,14 @@ namespace RECOMANAGESYS
                         }
 
                         string updateStatusQuery = @"
-                                    UPDATE TBL_Units
-                                    SET IsOccupied = CASE 
-                                        WHEN UnitType = 'Apartment' AND ISNULL(AvailableRooms,0) = 0 THEN 1 
-                                        WHEN UnitType != 'Apartment' THEN 1
-                                        ELSE IsOccupied 
-                                    END
-                                    WHERE UnitID = @unitId;";
+                            UPDATE TBL_Units
+                            SET IsOccupied = CASE 
+                                WHEN UnitType = 'Apartment' AND ISNULL(AvailableRooms,0) = 0 THEN 1 
+                                WHEN UnitType != 'Apartment' THEN 1
+                                ELSE IsOccupied 
+                            END
+                            WHERE UnitID = @unitId;";
+
                         using (SqlCommand updateStatusCmd = new SqlCommand(updateStatusQuery, conn))
                         {
                             updateStatusCmd.Parameters.AddWithValue("@unitId", selectedUnitId);
@@ -485,6 +591,7 @@ namespace RECOMANAGESYS
                         }
                     }
 
+          
                     MessageBox.Show(
                         isEditMode ? "Resident updated successfully" : "Resident registered successfully!",
                         "Success",
@@ -508,7 +615,6 @@ namespace RECOMANAGESYS
             FirstNametxt.Clear();
             MiddleNametxt.Clear();
             lastNametxt.Clear();
-            addresstxt.Clear();
             contactnumtxt.Clear();
             Emailtxt.Clear();
             emergencyPersontxt.Clear();
@@ -537,30 +643,50 @@ namespace RECOMANAGESYS
         {
             string selectedType = cmbType.SelectedItem?.ToString() ?? "";
 
-            bool isTenantOrCaretaker = selectedType.Equals("Tenant", StringComparison.OrdinalIgnoreCase)
-                                      || selectedType.Equals("Caretaker", StringComparison.OrdinalIgnoreCase);
+            lblValidation.Text = "";
 
-            cmbUnitNum.Enabled = isTenantOrCaretaker;
-            cmbBlock.Enabled = isTenantOrCaretaker;
-
-            if (lblValidation != null) lblValidation.Text = "";
-
-            if (!isTenantOrCaretaker)
+            if (selectedType.Equals("Owner", StringComparison.OrdinalIgnoreCase))
             {
+                cmbBlock.Visible = false;
+                cmbUnitNum.Visible = false;
+
+                lblValidation.Text = "";
+                lblValidation.ForeColor = Color.Black;
+                lblAdd.Text = "Unit will be registered in next step";
+            }
+            else if (selectedType.Equals("Tenant", StringComparison.OrdinalIgnoreCase) ||
+                     selectedType.Equals("Caretaker", StringComparison.OrdinalIgnoreCase))
+            {
+                cmbBlock.Visible = true;
+                cmbUnitNum.Visible = true;
+                cmbUnitNum.Enabled = true;
+                cmbBlock.Enabled = true;
                 cmbUnitNum.Items.Clear();
                 cmbBlock.Items.Clear();
-                cmbUnitNum.SelectedIndex = -1;
-                cmbBlock.SelectedIndex = -1;
+
+                if (int.TryParse(ResidentIDtxt.Text.Trim(), out int ownerId))
+                {
+                    LoadAvailableUnitsForHomeowner(ownerId);
+                }
+                else
+                {
+                    lblValidation.ForeColor = Color.Red;
+                    lblValidation.Text = "Enter valid Owner ID to show available units.";
+                }
             }
 
             UpdateResidentIDLabel();
         }
 
+        
+
         private void AddProfile_Load(object sender, EventArgs e)
         {
-            cmbUnitNum.Enabled = false;
-            cmbBlock.Enabled = false;
-            if (lblValidation != null) lblValidation.Text = "";
+            cmbUnitNum.Enabled = true;
+            cmbBlock.Enabled = true;
+
+            if (lblValidation != null)
+                lblValidation.Text = "";
         }
 
         private class ComboBoxItem
@@ -572,7 +698,9 @@ namespace RECOMANAGESYS
 
         private void cmbUnitNum_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbUnitNum.SelectedItem is ComboBoxItem item)
+            string selectedType = cmbType.SelectedItem?.ToString() ?? "";
+
+            if (selectedType != "Owner" && cmbUnitNum.SelectedItem is ComboBoxItem dbItem)
             {
                 try
                 {
@@ -582,20 +710,30 @@ namespace RECOMANAGESYS
                         string q = "SELECT Block FROM TBL_Units WHERE UnitID = @unitId";
                         using (SqlCommand cmd = new SqlCommand(q, conn))
                         {
-                            cmd.Parameters.AddWithValue("@unitId", item.Value);
+                            cmd.Parameters.AddWithValue("@unitId", dbItem.Value);
                             object o = cmd.ExecuteScalar();
                             if (o != null && o != DBNull.Value)
                             {
                                 string block = o.ToString();
-                                cmbBlock.Items.Clear();
-                                cmbBlock.Items.Add(block);
-                                cmbBlock.SelectedIndex = 0;
+                                if (cmbBlock.SelectedItem?.ToString() != block)
+                                {
+                                    for (int i = 0; i < cmbBlock.Items.Count; i++)
+                                    {
+                                        if (cmbBlock.Items[i].ToString() == block)
+                                        {
+                                            cmbBlock.SelectedIndex = i;
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
                 catch { }
             }
+
+            UpdateFullAddress(); 
         }
 
         private void cmbUnitNum_DropDown(object sender, EventArgs e)
@@ -614,61 +752,52 @@ namespace RECOMANAGESYS
 
         private void LoadAvailableUnitsForHomeowner(int homeownerId)
         {
+            if (cmbType.SelectedItem?.ToString() == "Owner")
+                return;
+
             try
             {
-                cmbUnitNum.Items.Clear();
                 cmbBlock.Items.Clear();
+                cmbUnitNum.Items.Clear();
 
                 using (SqlConnection conn = DatabaseHelper.GetConnection())
                 {
                     conn.Open();
 
-                    string query = @"
-                        SELECT 
-                            tu.UnitID, 
-                            tu.UnitNumber, 
-                            tu.Block, 
-                            tu.UnitType, 
-                            tu.AvailableRooms,
-                            TRY_CAST(tu.UnitNumber AS INT) AS UnitNumberInt
+                    string blockQuery = @"
+                        SELECT DISTINCT tu.Block, TRY_CAST(tu.Block AS INT) AS BlockInt
                         FROM HomeownerUnits hu
                         INNER JOIN Residents r ON hu.ResidentID = r.ResidentID
                         INNER JOIN TBL_Units tu ON hu.UnitID = tu.UnitID
                         WHERE r.HomeownerID = @homeownerId
                           AND r.ResidencyType = 'Owner'
                           AND hu.IsCurrent = 1
-                        GROUP BY tu.UnitID, tu.UnitNumber, tu.Block, tu.UnitType, tu.AvailableRooms
-                        ORDER BY UnitNumberInt, tu.UnitNumber;";
+                        ORDER BY BlockInt, tu.Block;";
 
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    using (SqlCommand cmd = new SqlCommand(blockQuery, conn))
                     {
                         cmd.Parameters.AddWithValue("@homeownerId", homeownerId);
                         using (SqlDataReader reader = cmd.ExecuteReader())
                         {
                             while (reader.Read())
                             {
-                                int unitId = Convert.ToInt32(reader["UnitID"]);
-                                string unitNumber = reader["UnitNumber"]?.ToString() ?? "";
                                 string block = reader["Block"]?.ToString() ?? "";
-                                string unitType = reader["UnitType"]?.ToString() ?? "";
-                                int availableRooms = reader["AvailableRooms"] == DBNull.Value ? -1 : Convert.ToInt32(reader["AvailableRooms"]);
-
-                                string label = unitNumber + (string.IsNullOrWhiteSpace(block) ? "" : $" (Block {block})");
-                                if (unitType.Equals("Apartment", StringComparison.OrdinalIgnoreCase) && availableRooms >= 0)
-                                {
-                                    label += $" - {availableRooms} rooms left";
-                                }
-
-                                cmbUnitNum.Items.Add(new ComboBoxItem { Text = label, Value = unitId });
+                                if (!string.IsNullOrWhiteSpace(block))
+                                    cmbBlock.Items.Add(block);
                             }
                         }
                     }
                 }
 
-                if (cmbUnitNum.Items.Count == 0)
+                if (cmbBlock.Items.Count == 0)
                 {
                     lblValidation.ForeColor = System.Drawing.Color.Red;
                     lblValidation.Text = "No active units found for this homeowner.";
+                }
+                else
+                {
+                    lblValidation.Text = "";
+                    cmbBlock.SelectedIndex = 0;
                 }
             }
             catch (Exception ex)
@@ -691,7 +820,27 @@ namespace RECOMANAGESYS
         private void textBox1_TextChanged_1(object sender, EventArgs e) { }
         private void label14_Click(object sender, EventArgs e) { }
         private void label4_Click(object sender, EventArgs e) { }
-        private void cmbBlock_SelectedIndexChanged(object sender, EventArgs e) { }
+        private void cmbBlock_SelectedIndexChanged(object sender, EventArgs e) {
+            string selectedType = cmbType.SelectedItem?.ToString() ?? "";
+
+            if (selectedType == "Owner")
+            {
+                if (cmbBlock.SelectedItem != null)
+                {
+                    string selectedBlock = cmbBlock.SelectedItem.ToString();
+                    LoadLotsForBlock(selectedBlock);
+                }
+            }
+            else
+            {
+                if (cmbBlock.SelectedItem != null)
+                {
+                    LoadLotsForBlockFromOwner();
+                }
+            }
+
+            UpdateFullAddress();
+        }
         private void lblValidation_Click(object sender, EventArgs e) { }
 
         private void btnUploadProof_Click(object sender, EventArgs e)
@@ -709,7 +858,145 @@ namespace RECOMANAGESYS
                 }
             }
         }
+        private void LoadFixedBlocksAndLots()
+        {
+            cmbBlock.Items.Clear();
+            cmbBlock.Items.AddRange(new string[] { "1", "2", "3", "4", "5" });
 
+            cmbBlock.SelectedIndexChanged -= cmbBlock_SelectedIndexChanged; 
+            cmbBlock.SelectedIndex = 0;
+            cmbBlock.SelectedIndexChanged += cmbBlock_SelectedIndexChanged;
+
+            LoadLotsForBlock("1");
+        }
+        private void LoadLotsForBlock(string block)
+        {
+            cmbUnitNum.Items.Clear();
+            int lotCount = 0;
+
+            switch (block)
+            {
+                case "1": lotCount = 20; break;
+                case "2": lotCount = 31; break;
+                case "3": lotCount = 26; break;
+                case "4": lotCount = 22; break;
+                case "5": lotCount = 21; break;
+            }
+
+            for (int i = 1; i <= lotCount; i++)
+                cmbUnitNum.Items.Add(i.ToString());
+
+            if (cmbUnitNum.Items.Count > 0)
+                cmbUnitNum.SelectedIndex = 0;
+            UpdateFullAddress();
+        }
+        private void UpdateFullAddress()
+        {
+            string selectedType = cmbType.SelectedItem?.ToString() ?? "";
+
+            if (selectedType == "Owner")
+            {
+                if (cmbBlock.SelectedItem != null && cmbUnitNum.SelectedItem != null)
+                {
+                    string block = cmbBlock.SelectedItem.ToString();
+                    string lot = cmbUnitNum.SelectedItem.ToString();
+                    lblAdd.Text = $"Block {block}, Lot {lot}, Mabuhay Homes 2000 Ph2F Golden City Brgy, Dila Santarosa City";
+                }
+            }
+            else
+            {
+                if (cmbBlock.SelectedItem != null && cmbUnitNum.SelectedItem is ComboBoxItem item)
+                {
+                    string block = cmbBlock.SelectedItem.ToString();
+                    try
+                    {
+                        using (SqlConnection conn = DatabaseHelper.GetConnection())
+                        {
+                            conn.Open();
+                            string q = "SELECT UnitNumber FROM TBL_Units WHERE UnitID = @unitId";
+                            using (SqlCommand cmd = new SqlCommand(q, conn))
+                            {
+                                cmd.Parameters.AddWithValue("@unitId", item.Value);
+                                object o = cmd.ExecuteScalar();
+                                if (o != null && o != DBNull.Value)
+                                {
+                                    string lot = o.ToString();
+                                    lblAdd.Text = $"Block {block}, Lot {lot}, Mabuhay Homes 2000 Ph2F Golden City Brgy, Dila Santarosa City";
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+        private void LoadLotsForBlockFromOwner()
+        {
+            if (!int.TryParse(ResidentIDtxt.Text.Trim(), out int homeownerId))
+                return;
+
+            string selectedBlock = cmbBlock.SelectedItem?.ToString() ?? "";
+            if (string.IsNullOrWhiteSpace(selectedBlock))
+                return;
+
+            try
+            {
+                cmbUnitNum.Items.Clear();
+
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+
+                    string query = @"
+                    SELECT 
+                        tu.UnitID, 
+                        tu.UnitNumber, 
+                        tu.UnitType, 
+                        tu.AvailableRooms,
+                        TRY_CAST(tu.UnitNumber AS INT) AS UnitNumberInt
+                    FROM HomeownerUnits hu
+                    INNER JOIN Residents r ON hu.ResidentID = r.ResidentID
+                    INNER JOIN TBL_Units tu ON hu.UnitID = tu.UnitID
+                    WHERE r.HomeownerID = @homeownerId
+                      AND r.ResidencyType = 'Owner'
+                      AND hu.IsCurrent = 1
+                      AND tu.Block = @block
+                    ORDER BY UnitNumberInt, tu.UnitNumber;";
+
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@homeownerId", homeownerId);
+                        cmd.Parameters.AddWithValue("@block", selectedBlock);
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                int unitId = Convert.ToInt32(reader["UnitID"]);
+                                string unitNumber = reader["UnitNumber"]?.ToString() ?? "";
+                                string unitType = reader["UnitType"]?.ToString() ?? "";
+                                int availableRooms = reader["AvailableRooms"] == DBNull.Value ? -1 : Convert.ToInt32(reader["AvailableRooms"]);
+
+                                string label = $"Lot {unitNumber}";
+                                if (unitType.Equals("Apartment", StringComparison.OrdinalIgnoreCase) && availableRooms >= 0)
+                                {
+                                    label += $" ({availableRooms} rooms left)";
+                                }
+
+                                cmbUnitNum.Items.Add(new ComboBoxItem { Text = label, Value = unitId });
+                            }
+                        }
+                    }
+                }
+
+                if (cmbUnitNum.Items.Count > 0)
+                    cmbUnitNum.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading lots: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         private void lblFileName_Click(object sender, EventArgs e)
         {
             try
@@ -723,7 +1010,6 @@ namespace RECOMANAGESYS
 
                 string fileExtension = System.IO.Path.GetExtension(uploadedFileName).ToLower();
 
-                // smaall pop up window
                 Form previewForm = new Form();
                 previewForm.Text = "Proof of Residency Preview";
                 previewForm.StartPosition = FormStartPosition.CenterParent;
@@ -734,7 +1020,6 @@ namespace RECOMANAGESYS
 
                 if (fileExtension == ".jpg" || fileExtension == ".jpeg" || fileExtension == ".png")
                 {
-                    // for images
                     PictureBox pictureBox = new PictureBox();
                     pictureBox.Dock = DockStyle.Fill;
                     pictureBox.SizeMode = PictureBoxSizeMode.Zoom;
@@ -781,5 +1066,12 @@ namespace RECOMANAGESYS
                                 "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void lblAdd_Click(object sender, EventArgs e)
+        {
+
+        }
+      
+
     }
 }

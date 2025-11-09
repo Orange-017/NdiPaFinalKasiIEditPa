@@ -58,10 +58,10 @@
             this.panelQuickAnnouncements.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panelQuickAnnouncements.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelQuickAnnouncements.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.panelQuickAnnouncements.Location = new System.Drawing.Point(105, 241);
+            this.panelQuickAnnouncements.Location = new System.Drawing.Point(93, 193);
             this.panelQuickAnnouncements.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelQuickAnnouncements.Name = "panelQuickAnnouncements";
-            this.panelQuickAnnouncements.Size = new System.Drawing.Size(1038, 290);
+            this.panelQuickAnnouncements.Size = new System.Drawing.Size(923, 232);
             this.panelQuickAnnouncements.TabIndex = 1;
             // 
             // lblGreeting
@@ -69,9 +69,9 @@
             this.lblGreeting.AutoSize = true;
             this.lblGreeting.BackColor = System.Drawing.Color.Transparent;
             this.lblGreeting.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblGreeting.Location = new System.Drawing.Point(541, 89);
+            this.lblGreeting.Location = new System.Drawing.Point(481, 71);
             this.lblGreeting.Name = "lblGreeting";
-            this.lblGreeting.Size = new System.Drawing.Size(202, 32);
+            this.lblGreeting.Size = new System.Drawing.Size(172, 29);
             this.lblGreeting.TabIndex = 5;
             this.lblGreeting.Text = "Greeting Label";
             // 
@@ -80,12 +80,13 @@
             this.lblDateTime.AutoSize = true;
             this.lblDateTime.BackColor = System.Drawing.Color.Transparent;
             this.lblDateTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDateTime.Location = new System.Drawing.Point(541, 126);
+            this.lblDateTime.Location = new System.Drawing.Point(481, 101);
             this.lblDateTime.Name = "lblDateTime";
-            this.lblDateTime.Size = new System.Drawing.Size(215, 32);
+            this.lblDateTime.Size = new System.Drawing.Size(185, 29);
             this.lblDateTime.TabIndex = 6;
             this.lblDateTime.Text = "TimeDate Label";
             this.lblDateTime.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.lblDateTime.Click += new System.EventHandler(this.lblDateTime_Click);
             // 
             // btnNotif
             // 
@@ -97,10 +98,10 @@
             this.btnNotif.IconChar = FontAwesome.Sharp.IconChar.None;
             this.btnNotif.IconColor = System.Drawing.Color.Black;
             this.btnNotif.IconFont = FontAwesome.Sharp.IconFont.Auto;
-            this.btnNotif.Location = new System.Drawing.Point(1125, 72);
+            this.btnNotif.Location = new System.Drawing.Point(1000, 58);
             this.btnNotif.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnNotif.Name = "btnNotif";
-            this.btnNotif.Size = new System.Drawing.Size(48, 45);
+            this.btnNotif.Size = new System.Drawing.Size(43, 36);
             this.btnNotif.TabIndex = 7;
             this.btnNotif.UseVisualStyleBackColor = false;
             this.btnNotif.Click += new System.EventHandler(this.btnNotif_Click);
@@ -110,9 +111,9 @@
             this.lblAnnounce.AutoSize = true;
             this.lblAnnounce.BackColor = System.Drawing.Color.Transparent;
             this.lblAnnounce.Font = new System.Drawing.Font("Microsoft YaHei UI", 13.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAnnounce.Location = new System.Drawing.Point(99, 202);
+            this.lblAnnounce.Location = new System.Drawing.Point(88, 162);
             this.lblAnnounce.Name = "lblAnnounce";
-            this.lblAnnounce.Size = new System.Drawing.Size(334, 37);
+            this.lblAnnounce.Size = new System.Drawing.Size(277, 31);
             this.lblAnnounce.TabIndex = 8;
             this.lblAnnounce.Text = "Quick Announcements";
             this.lblAnnounce.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -122,9 +123,9 @@
             this.lblNotifCount.AutoSize = true;
             this.lblNotifCount.BackColor = System.Drawing.Color.Transparent;
             this.lblNotifCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNotifCount.Location = new System.Drawing.Point(1150, 64);
+            this.lblNotifCount.Location = new System.Drawing.Point(1022, 51);
             this.lblNotifCount.Name = "lblNotifCount";
-            this.lblNotifCount.Size = new System.Drawing.Size(23, 25);
+            this.lblNotifCount.Size = new System.Drawing.Size(18, 20);
             this.lblNotifCount.TabIndex = 10;
             this.lblNotifCount.Text = "0";
             // 
@@ -133,9 +134,9 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 13.8F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(101, 554);
+            this.label1.Location = new System.Drawing.Point(90, 443);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(218, 37);
+            this.label1.Size = new System.Drawing.Size(178, 31);
             this.label1.TabIndex = 10;
             this.label1.Text = "Visitors Today";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -145,9 +146,9 @@
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 13.8F, System.Drawing.FontStyle.Bold);
-            this.label2.Location = new System.Drawing.Point(471, 554);
+            this.label2.Location = new System.Drawing.Point(419, 443);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(262, 37);
+            this.label2.Size = new System.Drawing.Size(215, 31);
             this.label2.TabIndex = 11;
             this.label2.Text = "Scheduled Events";
             this.label2.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -157,9 +158,9 @@
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("Microsoft YaHei UI", 13.8F, System.Drawing.FontStyle.Bold);
-            this.label3.Location = new System.Drawing.Point(843, 554);
+            this.label3.Location = new System.Drawing.Point(749, 443);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(270, 37);
+            this.label3.Size = new System.Drawing.Size(222, 31);
             this.label3.TabIndex = 12;
             this.label3.Text = "Garbage Schedule";
             this.label3.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -172,19 +173,19 @@
             this.visitorShowPanel.Controls.Add(this.lvVisitor);
             this.visitorShowPanel.Controls.Add(this.lblTodayVisitors);
             this.visitorShowPanel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.visitorShowPanel.Location = new System.Drawing.Point(105, 592);
+            this.visitorShowPanel.Location = new System.Drawing.Point(93, 474);
             this.visitorShowPanel.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.visitorShowPanel.Name = "visitorShowPanel";
-            this.visitorShowPanel.Size = new System.Drawing.Size(293, 233);
+            this.visitorShowPanel.Size = new System.Drawing.Size(261, 187);
             this.visitorShowPanel.TabIndex = 13;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(134, 34);
+            this.label4.Location = new System.Drawing.Point(119, 27);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(92, 26);
+            this.label4.Size = new System.Drawing.Size(77, 22);
             this.label4.TabIndex = 2;
             this.label4.Text = "Visitors";
             // 
@@ -192,10 +193,10 @@
             // 
             this.lvVisitor.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lvVisitor.HideSelection = false;
-            this.lvVisitor.Location = new System.Drawing.Point(15, 90);
+            this.lvVisitor.Location = new System.Drawing.Point(13, 72);
             this.lvVisitor.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lvVisitor.Name = "lvVisitor";
-            this.lvVisitor.Size = new System.Drawing.Size(262, 122);
+            this.lvVisitor.Size = new System.Drawing.Size(233, 98);
             this.lvVisitor.TabIndex = 1;
             this.lvVisitor.UseCompatibleStateImageBehavior = false;
             // 
@@ -203,9 +204,9 @@
             // 
             this.lblTodayVisitors.AutoSize = true;
             this.lblTodayVisitors.Font = new System.Drawing.Font("Microsoft Sans Serif", 22F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTodayVisitors.Location = new System.Drawing.Point(68, 19);
+            this.lblTodayVisitors.Location = new System.Drawing.Point(60, 15);
             this.lblTodayVisitors.Name = "lblTodayVisitors";
-            this.lblTodayVisitors.Size = new System.Drawing.Size(72, 52);
+            this.lblTodayVisitors.Size = new System.Drawing.Size(62, 42);
             this.lblTodayVisitors.TabIndex = 0;
             this.lblTodayVisitors.Text = "00";
             // 
@@ -214,10 +215,10 @@
             this.panelSchedule.BackColor = System.Drawing.SystemColors.ControlLight;
             this.panelSchedule.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panelSchedule.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.panelSchedule.Location = new System.Drawing.Point(478, 594);
+            this.panelSchedule.Location = new System.Drawing.Point(425, 475);
             this.panelSchedule.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelSchedule.Name = "panelSchedule";
-            this.panelSchedule.Size = new System.Drawing.Size(293, 232);
+            this.panelSchedule.Size = new System.Drawing.Size(261, 186);
             this.panelSchedule.TabIndex = 14;
             // 
             // panelGarbageDisplay
@@ -229,19 +230,19 @@
             this.panelGarbageDisplay.Controls.Add(this.lblNextTime1);
             this.panelGarbageDisplay.Controls.Add(this.lblNextDay1);
             this.panelGarbageDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.panelGarbageDisplay.Location = new System.Drawing.Point(849, 594);
+            this.panelGarbageDisplay.Location = new System.Drawing.Point(755, 475);
             this.panelGarbageDisplay.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panelGarbageDisplay.Name = "panelGarbageDisplay";
-            this.panelGarbageDisplay.Size = new System.Drawing.Size(293, 232);
+            this.panelGarbageDisplay.Size = new System.Drawing.Size(261, 186);
             this.panelGarbageDisplay.TabIndex = 15;
             // 
             // lblNextTime2
             // 
             this.lblNextTime2.AutoSize = true;
             this.lblNextTime2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNextTime2.Location = new System.Drawing.Point(17, 151);
+            this.lblNextTime2.Location = new System.Drawing.Point(15, 121);
             this.lblNextTime2.Name = "lblNextTime2";
-            this.lblNextTime2.Size = new System.Drawing.Size(72, 25);
+            this.lblNextTime2.Size = new System.Drawing.Size(60, 20);
             this.lblNextTime2.TabIndex = 5;
             this.lblNextTime2.Text = "Time2";
             // 
@@ -249,9 +250,9 @@
             // 
             this.lblNextDay2.AutoSize = true;
             this.lblNextDay2.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNextDay2.Location = new System.Drawing.Point(15, 111);
+            this.lblNextDay2.Location = new System.Drawing.Point(13, 89);
             this.lblNextDay2.Name = "lblNextDay2";
-            this.lblNextDay2.Size = new System.Drawing.Size(105, 40);
+            this.lblNextDay2.Size = new System.Drawing.Size(88, 36);
             this.lblNextDay2.TabIndex = 4;
             this.lblNextDay2.Text = "Day2";
             // 
@@ -259,9 +260,9 @@
             // 
             this.lblNextTime1.AutoSize = true;
             this.lblNextTime1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNextTime1.Location = new System.Drawing.Point(17, 65);
+            this.lblNextTime1.Location = new System.Drawing.Point(15, 52);
             this.lblNextTime1.Name = "lblNextTime1";
-            this.lblNextTime1.Size = new System.Drawing.Size(72, 25);
+            this.lblNextTime1.Size = new System.Drawing.Size(60, 20);
             this.lblNextTime1.TabIndex = 3;
             this.lblNextTime1.Text = "Time1";
             // 
@@ -269,15 +270,15 @@
             // 
             this.lblNextDay1.AutoSize = true;
             this.lblNextDay1.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblNextDay1.Location = new System.Drawing.Point(15, 25);
+            this.lblNextDay1.Location = new System.Drawing.Point(13, 20);
             this.lblNextDay1.Name = "lblNextDay1";
-            this.lblNextDay1.Size = new System.Drawing.Size(105, 40);
+            this.lblNextDay1.Size = new System.Drawing.Size(88, 36);
             this.lblNextDay1.TabIndex = 3;
             this.lblNextDay1.Text = "Day1";
             // 
             // dashboardControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
@@ -293,9 +294,9 @@
             this.Controls.Add(this.lblGreeting);
             this.Controls.Add(this.panelQuickAnnouncements);
             this.Controls.Add(this.panelSchedule);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "dashboardControl";
-            this.Size = new System.Drawing.Size(1249, 920);
+            this.Size = new System.Drawing.Size(1110, 736);
             this.Load += new System.EventHandler(this.dashboardControl_Load);
             this.visitorShowPanel.ResumeLayout(false);
             this.visitorShowPanel.PerformLayout();

@@ -31,8 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddUnits));
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.unitNumbertxt = new System.Windows.Forms.TextBox();
-            this.blocktxt = new System.Windows.Forms.TextBox();
             this.Savebtn = new System.Windows.Forms.Button();
             this.Cancelbtn = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
@@ -46,6 +44,8 @@
             this.lblHomeownerInfo = new System.Windows.Forms.Label();
             this.cmbNumRooms = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.cmbBlock = new System.Windows.Forms.ComboBox();
+            this.cmbLot = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // label1
@@ -53,43 +53,23 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(107, 143);
+            this.label1.Location = new System.Drawing.Point(140, 189);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(192, 27);
+            this.label1.Size = new System.Drawing.Size(44, 27);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Unit(Lot) Number";
+            this.label1.Text = "Lot";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold);
-            this.label2.Location = new System.Drawing.Point(107, 217);
+            this.label2.Location = new System.Drawing.Point(140, 125);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(67, 27);
             this.label2.TabIndex = 1;
             this.label2.Text = "Block";
             this.label2.Click += new System.EventHandler(this.label2_Click);
-            // 
-            // unitNumbertxt
-            // 
-            this.unitNumbertxt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.unitNumbertxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.unitNumbertxt.Location = new System.Drawing.Point(112, 173);
-            this.unitNumbertxt.Multiline = true;
-            this.unitNumbertxt.Name = "unitNumbertxt";
-            this.unitNumbertxt.Size = new System.Drawing.Size(307, 38);
-            this.unitNumbertxt.TabIndex = 3;
-            // 
-            // blocktxt
-            // 
-            this.blocktxt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.blocktxt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.blocktxt.Location = new System.Drawing.Point(112, 244);
-            this.blocktxt.Multiline = true;
-            this.blocktxt.Name = "blocktxt";
-            this.blocktxt.Size = new System.Drawing.Size(307, 38);
-            this.blocktxt.TabIndex = 4;
             // 
             // Savebtn
             // 
@@ -125,7 +105,7 @@
             this.label4.AutoSize = true;
             this.label4.BackColor = System.Drawing.Color.Transparent;
             this.label4.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold);
-            this.label4.Location = new System.Drawing.Point(107, 289);
+            this.label4.Location = new System.Drawing.Point(140, 255);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(110, 27);
             this.label4.TabIndex = 9;
@@ -136,9 +116,9 @@
             this.cmbUnitType.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.cmbUnitType.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cmbUnitType.FormattingEnabled = true;
-            this.cmbUnitType.Location = new System.Drawing.Point(112, 319);
+            this.cmbUnitType.Location = new System.Drawing.Point(150, 286);
             this.cmbUnitType.Name = "cmbUnitType";
-            this.cmbUnitType.Size = new System.Drawing.Size(307, 33);
+            this.cmbUnitType.Size = new System.Drawing.Size(187, 33);
             this.cmbUnitType.TabIndex = 12;
             this.cmbUnitType.SelectedIndexChanged += new System.EventHandler(this.cmbUnitType_SelectedIndexChanged);
             // 
@@ -204,6 +184,7 @@
             this.cmbApprovedBy.Name = "cmbApprovedBy";
             this.cmbApprovedBy.Size = new System.Drawing.Size(307, 33);
             this.cmbApprovedBy.TabIndex = 21;
+            this.cmbApprovedBy.SelectedIndexChanged += new System.EventHandler(this.cmbApprovedBy_SelectedIndexChanged);
             // 
             // lblHomeownerInfo
             // 
@@ -221,9 +202,9 @@
             this.cmbNumRooms.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.cmbNumRooms.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
             this.cmbNumRooms.FormattingEnabled = true;
-            this.cmbNumRooms.Location = new System.Drawing.Point(112, 387);
+            this.cmbNumRooms.Location = new System.Drawing.Point(150, 362);
             this.cmbNumRooms.Name = "cmbNumRooms";
-            this.cmbNumRooms.Size = new System.Drawing.Size(307, 33);
+            this.cmbNumRooms.Size = new System.Drawing.Size(187, 33);
             this.cmbNumRooms.TabIndex = 22;
             // 
             // label3
@@ -231,11 +212,29 @@
             this.label3.AutoSize = true;
             this.label3.BackColor = System.Drawing.Color.Transparent;
             this.label3.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold);
-            this.label3.Location = new System.Drawing.Point(107, 357);
+            this.label3.Location = new System.Drawing.Point(140, 332);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(197, 27);
             this.label3.TabIndex = 23;
             this.label3.Text = "How Many Rooms";
+            // 
+            // cmbBlock
+            // 
+            this.cmbBlock.FormattingEnabled = true;
+            this.cmbBlock.Location = new System.Drawing.Point(145, 155);
+            this.cmbBlock.Name = "cmbBlock";
+            this.cmbBlock.Size = new System.Drawing.Size(192, 24);
+            this.cmbBlock.TabIndex = 24;
+            this.cmbBlock.SelectedIndexChanged += new System.EventHandler(this.cmbBlock_SelectedIndexChanged);
+            // 
+            // cmbLot
+            // 
+            this.cmbLot.FormattingEnabled = true;
+            this.cmbLot.Location = new System.Drawing.Point(145, 220);
+            this.cmbLot.Name = "cmbLot";
+            this.cmbLot.Size = new System.Drawing.Size(192, 24);
+            this.cmbLot.TabIndex = 25;
+            this.cmbLot.SelectedIndexChanged += new System.EventHandler(this.cmbLot_SelectedIndexChanged);
             // 
             // AddUnits
             // 
@@ -244,6 +243,8 @@
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(870, 519);
+            this.Controls.Add(this.cmbLot);
+            this.Controls.Add(this.cmbBlock);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.cmbNumRooms);
             this.Controls.Add(this.cmbApprovedBy);
@@ -257,8 +258,6 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.Cancelbtn);
             this.Controls.Add(this.Savebtn);
-            this.Controls.Add(this.blocktxt);
-            this.Controls.Add(this.unitNumbertxt);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
@@ -274,8 +273,6 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox unitNumbertxt;
-        private System.Windows.Forms.TextBox blocktxt;
         private System.Windows.Forms.Button Savebtn;
         private System.Windows.Forms.Button Cancelbtn;
         private System.Windows.Forms.Label label4;
@@ -289,5 +286,7 @@
         private System.Windows.Forms.Label lblHomeownerInfo;
         private System.Windows.Forms.ComboBox cmbNumRooms;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cmbBlock;
+        private System.Windows.Forms.ComboBox cmbLot;
     }
 }
